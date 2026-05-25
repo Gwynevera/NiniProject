@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
-    PlayerManager pManager;
+    PlayerManager playerManager;
     Rigidbody rb;
 
     float moveSpeed = 7.5f;
@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Awake()
     {
-        pManager = GetComponent<PlayerManager>();
+        playerManager = GetComponent<PlayerManager>();
 
         rb = GetComponent<Rigidbody>();
 
@@ -29,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (pManager.CanDoAction(PlayerAction.Move))
+        if (playerManager.CanDoAction(PlayerAction.Move))
         {
             movementInput = GetMovementInput();
         }
@@ -37,11 +37,11 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (movementInput != Vector3.zero && pManager.CanDoAction(PlayerAction.Move))
+        if (movementInput != Vector3.zero && playerManager.CanDoAction(PlayerAction.Move))
         {
-            float speed = pManager.myState == PlayerState.Charging ? chargeMoveSpeed : moveSpeed;
+            float speed = playerManager.myState == PlayerState.Charging ? chargeMoveSpeed : moveSpeed;
 
-            pManager.myState = PlayerState.Moving;
+            playerManager.myState = PlayerState.Moving;
 
             Vector3 desiredVelocity = movementInput * speed;
             Vector3 velocityChange = desiredVelocity - new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
@@ -50,9 +50,9 @@ public class PlayerMovement : MonoBehaviour
 
             transform.forward = Vector3.Lerp(transform.forward, movementInput, lerpSpeed * Time.fixedDeltaTime);
         }
-        else if (pManager.CanDoAction(PlayerAction.None))
+        else if (playerManager.CanDoAction(PlayerAction.None))
         {
-            pManager.myState = PlayerState.Idle;
+            playerManager.myState = PlayerState.Idle;
             rb.linearVelocity = Vector3.zero;
         }
     }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerHitstop : MonoBehaviour
 {
-    PlayerManager pManager;
+    PlayerManager playerManager;
     PlayerAttack pAttack;
     Rigidbody rb;
 
@@ -23,7 +23,7 @@ public class PlayerHitstop : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        pManager = GetComponent<PlayerManager>();
+        playerManager = GetComponent<PlayerManager>();
         pAttack = GetComponent<PlayerAttack>();
         rb = GetComponent<Rigidbody>();
     }
@@ -49,12 +49,12 @@ public class PlayerHitstop : MonoBehaviour
                 {
                     damaged = false;
                     transform.position = originalPos;
-                    pManager.myState = PlayerState.Knockbacking;
+                    playerManager.myState = PlayerState.Knockbacking;
                 }
                 else
                 {
                     rb.linearVelocity = prevSpeed;
-                    pManager.myState = prevState;
+                    playerManager.myState = prevState;
                 }
             }
             else if (damaged)
@@ -67,7 +67,7 @@ public class PlayerHitstop : MonoBehaviour
 
     public void StartVictimHitstop(bool bigHit)
     {
-        pManager.myState = PlayerState.Hitstopping;
+        playerManager.myState = PlayerState.Hitstopping;
         
         originalPos = transform.position;
         damaged = true;
@@ -78,7 +78,7 @@ public class PlayerHitstop : MonoBehaviour
 
     public void StartBullyHitstop(PlayerState preState, Vector3 preSpeed, bool bigHit)
     {
-        pManager.myState = PlayerState.Hitstopping;
+        playerManager.myState = PlayerState.Hitstopping;
 
         originalPos = transform.position;
 

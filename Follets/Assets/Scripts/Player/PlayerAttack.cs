@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerAttack : MonoBehaviour
 {
-    PlayerManager pManager;
+    PlayerManager playerManager;
     Rigidbody rb;
 
     bool buffered;
@@ -47,7 +47,7 @@ public class PlayerAttack : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        pManager = GetComponent<PlayerManager>();
+        playerManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
     }
 
@@ -56,9 +56,9 @@ public class PlayerAttack : MonoBehaviour
     {
         if (GetAttackInput() || buffered)
         {
-            if (pManager.CanDoAction(PlayerAction.Attack))
+            if (playerManager.CanDoAction(PlayerAction.Attack))
             {
-                pManager.myState = PlayerState.Attacking;
+                playerManager.myState = PlayerState.Attacking;
 
                 attackTimer = 0;
                 buffered = false;
@@ -78,14 +78,14 @@ public class PlayerAttack : MonoBehaviour
             }
         }
 
-        if (IsAttackHold() && pManager.CanDoAction(PlayerAction.Charge))
+        if (IsAttackHold() && playerManager.CanDoAction(PlayerAction.Charge))
         {
-            if (pManager.myState != PlayerState.Charging)
+            if (playerManager.myState != PlayerState.Charging)
             {
                 chargeTimer += Time.fixedDeltaTime;
                 if (chargeTimer >= chargeMinTime)
                 {
-                    pManager.myState = PlayerState.Charging;
+                    playerManager.myState = PlayerState.Charging;
                 }
             }
             else
@@ -113,7 +113,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (pManager.myState == PlayerState.Attacking)
+        if (playerManager.myState == PlayerState.Attacking)
         {
             attackTimer += Time.fixedDeltaTime;
 
@@ -133,7 +133,7 @@ public class PlayerAttack : MonoBehaviour
                     {
                         charged = false;
                         chargeTimer = 0;
-                        pManager.myState = PlayerState.Idle;
+                        playerManager.myState = PlayerState.Idle;
                     }
                 }
             }
@@ -159,7 +159,7 @@ public class PlayerAttack : MonoBehaviour
 
                     if (attackTimer >= attackPrepareTime + attackActiveTime + attackRecoverTime)
                     {
-                        pManager.myState = PlayerState.Idle;
+                        playerManager.myState = PlayerState.Idle;
                     }
                 }
             }
@@ -223,7 +223,7 @@ public class PlayerAttack : MonoBehaviour
                             Vector3 dir = obj.transform.position - transform.position;
                             obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType);
 
-                            GetComponent<PlayerHitstop>().StartBullyHitstop(pManager.myState, rb.linearVelocity, knockType == KnockbackType.Big);
+                            GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.myState, rb.linearVelocity, knockType == KnockbackType.Big);
                         }
                     }
                 }
@@ -233,7 +233,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        //if (pManager.myState == PlayerState.Attacking)
+        //if (playerManager.myState == PlayerState.Attacking)
         {
             //Vector3 boxSize = charged ? chargeHitboxSize : hitboxSize;
             //float boxOffset = charged ? chargeHitboxOffset : hitboxOffset;

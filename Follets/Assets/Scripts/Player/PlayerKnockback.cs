@@ -14,7 +14,7 @@ enum KnockbackState
 
 public class PlayerKnockback : MonoBehaviour
 {
-    PlayerManager pManager;
+    PlayerManager playerManager;
     Rigidbody rb;
 
     KnockbackType knockbackType;
@@ -42,14 +42,14 @@ public class PlayerKnockback : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        pManager = GetComponent<PlayerManager>();
+        playerManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (pManager.myState == PlayerState.Knockbacking)
+        if (playerManager.myState == PlayerState.Knockbacking)
         {
             if (knockbackState == KnockbackState.Impulse)
             {
@@ -68,7 +68,7 @@ public class PlayerKnockback : MonoBehaviour
 
                     if (knockbackType == KnockbackType.Small)
                     {
-                        pManager.myState = PlayerState.Idle;
+                        playerManager.myState = PlayerState.Idle;
                         GetComponent<Collider>().enabled = true;
                     }
                     else
@@ -94,7 +94,7 @@ public class PlayerKnockback : MonoBehaviour
                     recoverTimer = 0f;
                     knockbackState = KnockbackState.Impulse;
 
-                    pManager.myState = PlayerState.Idle;
+                    playerManager.myState = PlayerState.Idle;
                     GetComponent<Collider>().enabled = true;
                 }
             }
@@ -110,7 +110,7 @@ public class PlayerKnockback : MonoBehaviour
         knockbackTimer = 0f;
         knockbackState = KnockbackState.Impulse;
 
-        pManager.health--;
+        playerManager.health--;
         GetComponent<Collider>().enabled = false;
 
         GetComponent<PlayerHitstop>().StartVictimHitstop(type == KnockbackType.Big);

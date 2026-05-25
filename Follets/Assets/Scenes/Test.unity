@@ -487,7 +487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
   myState: 0
   health: 3
-  hitstop: {fileID: 0}
+  myWeapon: {fileID: 0}
 --- !u!114 &365369817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -890,7 +890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
   myState: 0
   health: 3
-  hitstop: {fileID: 0}
+  myWeapon: {fileID: 0}
 --- !u!4 &1292303650
 Transform:
   m_ObjectHideFlags: 0
@@ -931,7 +931,6 @@ GameObject:
   - component: {fileID: 1572768753}
   - component: {fileID: 1572768752}
   - component: {fileID: 1572768755}
-  - component: {fileID: 1572768756}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1057,18 +1056,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!114 &1572768756
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1572768751}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e59dbef8e5ccba4d88c78e91d2660f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitstopManager
 --- !u!1 &1764287561
 GameObject:
   m_ObjectHideFlags: 0
@@ -1193,7 +1180,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
   myState: 0
   health: 3
-  hitstop: {fileID: 0}
+  myWeapon: {fileID: 0}
 --- !u!114 &1764287568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1296,6 +1283,59 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1767520772}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1917406167
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1917406169}
+  - component: {fileID: 1917406168}
+  m_Layer: 0
+  m_Name: Claymore
+  m_TagString: Weapon
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!135 &1917406168
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1917406167}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 1.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &1917406169
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1917406167}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.57936, y: -1.5, z: 0.05569}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2047830387
 GameObject:
   m_ObjectHideFlags: 0
@@ -1397,3 +1437,4 @@ SceneRoots:
   - {fileID: 365369807}
   - {fileID: 1292303650}
   - {fileID: 1764287564}
+  - {fileID: 1917406169}

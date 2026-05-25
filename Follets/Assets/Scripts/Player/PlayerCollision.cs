@@ -1,14 +1,15 @@
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public class PlayerCollision : MonoBehaviour
 {
-    PlayerManager pManager;
+    PlayerManager playerManager;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        pManager = GetComponent<PlayerManager>();
+        playerManager = GetComponent<PlayerManager>();
     }
 
     // Update is called once per frame
@@ -24,12 +25,24 @@ public class PlayerCollision : MonoBehaviour
             Vector3 knockDir = transform.position - c.transform.position;
             knockDir.y = 0;
 
-            if (pManager.CanDoAction(PlayerAction.Knockback)
+            if (playerManager.CanDoAction(PlayerAction.Knockback)
                 && !GetComponent<PlayerRoll>().invencible)
             {
-                transform.forward = -knockDir.normalized;
-                GetComponent<PlayerKnockback>().SetKnockbackDamage(knockDir, KnockbackType.Big);
+                //transform.forward = -knockDir.normalized;
+                ///GetComponent<PlayerKnockback>().SetKnockbackDamage(knockDir, KnockbackType.Big);
+                Debug.Log("Attacked");
             }
+        }
+    }
+
+    private void OnTriggerEnter(Collider t)
+    {
+        if (t != null && t.CompareTag("Weapon"))
+        {
+            string weaponPath = AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets(t.name).First());
+            float w = Resources.Load<Weapon>(weaponPath).weight;
+
+            ///playerManager.GetWeapon(w);
         }
     }
 }

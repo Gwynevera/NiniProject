@@ -27,12 +27,22 @@ public class PlayerManager : MonoBehaviour
     public PlayerState myState;
 
     public int health = 3;
-
-    public HitstopManager hitstop;
+    
+    public Weapon myWeapon;
 
     private void Awake()
     {
-        hitstop = FindAnyObjectByType<HitstopManager>();
+
+    }
+
+    public void GetWeapon(Weapon weapon)
+    {
+        if (myWeapon == null)
+            myWeapon = weapon;
+    }
+    public void DropWeapon()
+    {
+        myWeapon = null;
     }
 
     public bool CanDoAction(PlayerAction action)
