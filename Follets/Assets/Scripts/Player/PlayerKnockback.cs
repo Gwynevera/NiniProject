@@ -14,17 +14,18 @@ enum KnockbackState
 
 public class PlayerKnockback : MonoBehaviour
 {
+    PlayerManager pManager;
     Rigidbody rb;
 
     KnockbackType knockbackType;
     KnockbackState knockbackState;
 
     float knockbackTimeSmall = 0.5f;
-    float knockbackTimeBig = 1f;
+    float knockbackTimeBig = 1.25f;
     float knockbackTimer = 0f;
 
-    float knockbackSpeedSmall = 20f;
-    float knockbackSpeedBig = 30f;
+    float knockbackSpeedSmall = 25f;
+    float knockbackSpeedBig = 35f;
     float knockbackFrictionSmall = 0.8f;
     float knockbackFrictionBig = 0.9f;
 
@@ -41,13 +42,14 @@ public class PlayerKnockback : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
+        pManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (GetComponent<PlayerManager>().myState == PlayerState.Knockbacking)
+        if (pManager.myState == PlayerState.Knockbacking)
         {
             if (knockbackState == KnockbackState.Impulse)
             {
@@ -66,8 +68,8 @@ public class PlayerKnockback : MonoBehaviour
 
                     if (knockbackType == KnockbackType.Small)
                     {
-                        GetComponent<PlayerManager>().myState = PlayerState.Idle;
-                        GetComponent<SphereCollider>().enabled = true;
+                        pManager.myState = PlayerState.Idle;
+                        GetComponent<Collider>().enabled = true;
                     }
                     else
                     {
@@ -92,22 +94,28 @@ public class PlayerKnockback : MonoBehaviour
                     recoverTimer = 0f;
                     knockbackState = KnockbackState.Impulse;
 
-                    GetComponent<PlayerManager>().myState = PlayerState.Idle;
-                    GetComponent<SphereCollider>().enabled = true;
+                    pManager.myState = PlayerState.Idle;
+                    GetComponent<Collider>().enabled = true;
                 }
             }
         }
     }
 
-    public void SetKnockback(Vector3 dir, KnockbackType type)
+    public void SetKnockbackDamage(Vector3 dir, KnockbackType type)
     {
-        knockbackType = type;
-
-        knockbackTimer = 0f;
         knockbackDir = dir;
+        transform.forward = -dir;
+
+        knockbackType = type;
+        knockbackTimer = 0f;
         knockbackState = KnockbackState.Impulse;
 
-        GetComponent<PlayerManager>().myState = PlayerState.Knockbacking;
-        GetComponent<PlayerManager>().health--;
+        pManager.health--;
+        GetComponent<Collider>().enabled = false;
+
+        GetComponent<PlayerHitstop>().StartVictimHitstop(type == KnockbackType.Big);
+
+        float hitstopTime = type == KnockbackType.Small ? 0.1f : 0.25f;
+        ///GetComponent<PlayerManager>().hitstop.ActivarHitstop(hitstopTime, 0f);
     }
 }

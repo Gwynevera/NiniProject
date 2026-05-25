@@ -3,10 +3,12 @@ using UnityEngine;
 
 public class PlayerCollision : MonoBehaviour
 {
+    PlayerManager pManager;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-        
+        pManager = GetComponent<PlayerManager>();
     }
 
     // Update is called once per frame
@@ -15,22 +17,18 @@ public class PlayerCollision : MonoBehaviour
         
     }
 
-    private void OnTriggerStay(Collider c)
+    private void OnCollisionEnter(Collision c)
     {
-        if (c != null && c.tag == "Attack")
+        if (c != null && c.collider.CompareTag("Attack"))
         {
             Vector3 knockDir = transform.position - c.transform.position;
             knockDir.y = 0;
 
-            if (GetComponent<PlayerManager>().CanDoAction(PlayerAction.Knockback)
+            if (pManager.CanDoAction(PlayerAction.Knockback)
                 && !GetComponent<PlayerRoll>().invencible)
             {
-                GetComponent<SphereCollider>().enabled = false;
-
                 transform.forward = -knockDir.normalized;
-
-                GetComponent<PlayerManager>().myState = PlayerState.Knockbacking;
-                GetComponent<PlayerKnockback>().SetKnockback(knockDir, KnockbackType.Big);
+                GetComponent<PlayerKnockback>().SetKnockbackDamage(knockDir, KnockbackType.Big);
             }
         }
     }

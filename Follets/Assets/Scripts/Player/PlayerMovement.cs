@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
-    PlayerManager stateManager;
+    PlayerManager pManager;
     Rigidbody rb;
 
     float moveSpeed = 7.5f;
@@ -14,9 +14,11 @@ public class PlayerMovement : MonoBehaviour
 
     Vector3 movementInput;
 
+    float chargeMoveSpeed = 4f;
+
     void Awake()
     {
-        stateManager = GetComponent<PlayerManager>();
+        pManager = GetComponent<PlayerManager>();
 
         rb = GetComponent<Rigidbody>();
 
@@ -27,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (stateManager.CanDoAction(PlayerAction.Move))
+        if (pManager.CanDoAction(PlayerAction.Move))
         {
             movementInput = GetMovementInput();
         }
@@ -35,19 +37,22 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (movementInput != Vector3.zero && stateManager.CanDoAction(PlayerAction.Move))
+        if (movementInput != Vector3.zero && pManager.CanDoAction(PlayerAction.Move))
         {
-            stateManager.myState = PlayerState.Moving;
+            float speed = pManager.myState == PlayerState.Charging ? chargeMoveSpeed : moveSpeed;
 
-            Vector3 desiredVelocity = movementInput * moveSpeed;
+            pManager.myState = PlayerState.Moving;
+
+            Vector3 desiredVelocity = movementInput * speed;
             Vector3 velocityChange = desiredVelocity - new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
             rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
             transform.forward = Vector3.Lerp(transform.forward, movementInput, lerpSpeed * Time.fixedDeltaTime);
         }
-        else if (stateManager.CanDoAction(PlayerAction.None))
+        else if (pManager.CanDoAction(PlayerAction.None))
         {
-            stateManager.myState = PlayerState.Idle;
+            pManager.myState = PlayerState.Idle;
             rb.linearVelocity = Vector3.zero;
         }
     }

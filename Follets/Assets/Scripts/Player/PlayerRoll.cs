@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerRoll : MonoBehaviour
 {
-    PlayerManager stateManager;
+    PlayerManager pManager;
     Rigidbody rb;
 
     bool rollOnce;
@@ -20,14 +20,13 @@ public class PlayerRoll : MonoBehaviour
 
     void Awake()
     {
-        stateManager = GetComponent<PlayerManager>();
-
+        pManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
-        if (GetRollInput() && stateManager.CanDoAction(PlayerAction.Roll))
+        if (GetRollInput() && pManager.CanDoAction(PlayerAction.Roll))
         {
             StartRoll();
         }
@@ -35,7 +34,7 @@ public class PlayerRoll : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (stateManager.myState == PlayerState.Rolling)
+        if (pManager.myState == PlayerState.Rolling)
         {
             if (rollOnce)
             {
@@ -55,7 +54,7 @@ public class PlayerRoll : MonoBehaviour
 
             if (rollTimer >= rollDuration)
             {
-                stateManager.myState = PlayerState.Idle;
+                pManager.myState = PlayerState.Idle;
                 invencible = false;
             }
         }
@@ -63,7 +62,7 @@ public class PlayerRoll : MonoBehaviour
 
     void StartRoll()
     {
-        stateManager.myState = PlayerState.Rolling;
+        pManager.myState = PlayerState.Rolling;
 
         rollTimer = 0f;
         invencible = true;
