@@ -123,7 +123,7 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (attackTimer < chargeActiveTime)
                 {
-                    HitboxCheck(KnockbackType.Big, chargeHitboxOffset, chargeHitboxSize/2);
+                    HitboxCheck(KnockbackType.Big, chargeHitboxOffset, chargeHitboxSize);
                 }
                 else
                 {
@@ -149,7 +149,7 @@ public class PlayerAttack : MonoBehaviour
                             rb.AddForce(transform.forward * attackMoveSpeed, ForceMode.VelocityChange);
                         }
 
-                        HitboxCheck(KnockbackType.Small, hitboxOffset, hitboxSize/2);
+                        HitboxCheck(KnockbackType.Small, hitboxOffset, hitboxSize);
                     }
                     else if (attackTimer >= attackPrepareTime + attackActiveTime)
                     {
@@ -207,7 +207,11 @@ public class PlayerAttack : MonoBehaviour
 
     void HitboxCheck(KnockbackType knockType, float boxOffset, Vector3 boxSize)
     {
-        Collider[] objects = Physics.OverlapBox(transform.position + (boxOffset * transform.forward), boxSize, transform.rotation);
+        Vector3 boxCenter = transform.position + (boxOffset * transform.forward);
+        Collider[] objects = Physics.OverlapBox(boxCenter, boxSize, transform.rotation);
+
+        // Dibujar la caja del OverlapBox
+        DrawOverlapBox(boxCenter, boxSize, transform.rotation, knockType == KnockbackType.Big ? Color.red : Color.blue);
 
         if (objects != null && objects.Length > 0)
         {
@@ -221,7 +225,7 @@ public class PlayerAttack : MonoBehaviour
                             && !obj.GetComponent<PlayerRoll>().invencible)
                         {
                             Vector3 dir = obj.transform.position - transform.position;
-                            obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType);
+                            obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType, playerManager.myWeapon != null);
 
                             GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.myState, rb.linearVelocity, knockType == KnockbackType.Big);
                         }
@@ -229,6 +233,48 @@ public class PlayerAttack : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void DrawOverlapBox(Vector3 center, Vector3 size, Quaternion rotation, Color color)
+    {
+        // Calcula los 8 vértices de la caja
+        Vector3 halfSize = size * 0.5f;
+        Vector3[] corners = new Vector3[8]
+        {
+            new Vector3(-halfSize.x, -halfSize.y, -halfSize.z),
+            new Vector3(halfSize.x, -halfSize.y, -halfSize.z),
+            new Vector3(halfSize.x, halfSize.y, -halfSize.z),
+            new Vector3(-halfSize.x, halfSize.y, -halfSize.z),
+            new Vector3(-halfSize.x, -halfSize.y, halfSize.z),
+            new Vector3(halfSize.x, -halfSize.y, halfSize.z),
+            new Vector3(halfSize.x, halfSize.y, halfSize.z),
+            new Vector3(-halfSize.x, halfSize.y, halfSize.z)
+        };
+
+        // Aplica rotación y posición a cada esquina
+        for (int i = 0; i < corners.Length; i++)
+        {
+            corners[i] = center + rotation * corners[i];
+        }
+
+        // Dibuja las 12 líneas (bordes de la caja)
+        // Cara frontal
+        Debug.DrawLine(corners[0], corners[1], color);
+        Debug.DrawLine(corners[1], corners[2], color);
+        Debug.DrawLine(corners[2], corners[3], color);
+        Debug.DrawLine(corners[3], corners[0], color);
+
+        // Cara trasera
+        Debug.DrawLine(corners[4], corners[5], color);
+        Debug.DrawLine(corners[5], corners[6], color);
+        Debug.DrawLine(corners[6], corners[7], color);
+        Debug.DrawLine(corners[7], corners[4], color);
+
+        // Conexiones entre caras
+        Debug.DrawLine(corners[0], corners[4], color);
+        Debug.DrawLine(corners[1], corners[5], color);
+        Debug.DrawLine(corners[2], corners[6], color);
+        Debug.DrawLine(corners[3], corners[7], color);
     }
 
     private void OnDrawGizmos()

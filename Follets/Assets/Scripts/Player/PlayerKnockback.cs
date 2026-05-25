@@ -101,7 +101,7 @@ public class PlayerKnockback : MonoBehaviour
         }
     }
 
-    public void SetKnockbackDamage(Vector3 dir, KnockbackType type)
+    public void SetKnockbackDamage(Vector3 dir, KnockbackType type, bool damage = true)
     {
         knockbackDir = dir;
         transform.forward = -dir;
@@ -110,12 +110,12 @@ public class PlayerKnockback : MonoBehaviour
         knockbackTimer = 0f;
         knockbackState = KnockbackState.Impulse;
 
-        playerManager.health--;
-        GetComponent<Collider>().enabled = false;
+        if (damage)
+        {
+            playerManager.health--;
+            GetComponent<Collider>().enabled = false;
+        }
 
         GetComponent<PlayerHitstop>().StartVictimHitstop(type == KnockbackType.Big);
-
-        float hitstopTime = type == KnockbackType.Small ? 0.1f : 0.25f;
-        ///GetComponent<PlayerManager>().hitstop.ActivarHitstop(hitstopTime, 0f);
     }
 }

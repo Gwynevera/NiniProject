@@ -66,7 +66,8 @@ public class PlayerManager : MonoBehaviour
                 return true;
 
             case PlayerAction.Charge:
-                if (myState == PlayerState.Attacking
+                if (myWeapon == null
+                    || myState == PlayerState.Attacking
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)
