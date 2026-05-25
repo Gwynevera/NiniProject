@@ -13,8 +13,8 @@ public class PlayerAttack : MonoBehaviour
     Vector3 attackDirection;
     float attackTimer;
 
-    float attackPrepareTime = 0.2f;
-    float attackActiveTime = 0.25f;
+    float attackPrepareTime = 0.1f;
+    float attackActiveTime = 0.15f;
     float attackRecoverTime = 0.2f;
 
     float attackMoveSpeed = 10f;
@@ -123,7 +123,7 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (attackTimer < chargeActiveTime)
                 {
-                    HitboxCheck(KnockbackType.Big, chargeHitboxOffset, chargeHitboxSize / 2);
+                    HitboxCheck(KnockbackType.Big, chargeHitboxOffset, chargeHitboxSize/2);
                 }
                 else
                 {
@@ -149,7 +149,7 @@ public class PlayerAttack : MonoBehaviour
                             rb.AddForce(transform.forward * attackMoveSpeed, ForceMode.VelocityChange);
                         }
 
-                        HitboxCheck(KnockbackType.Small, hitboxOffset, hitboxSize / 2);
+                        HitboxCheck(KnockbackType.Small, hitboxOffset, hitboxSize/2);
                     }
                     else if (attackTimer >= attackPrepareTime + attackActiveTime)
                     {

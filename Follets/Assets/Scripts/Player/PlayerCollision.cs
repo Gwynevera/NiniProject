@@ -1,5 +1,3 @@
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public class PlayerCollision : MonoBehaviour
@@ -39,10 +37,17 @@ public class PlayerCollision : MonoBehaviour
     {
         if (t != null && t.CompareTag("Weapon"))
         {
-            string weaponPath = AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets(t.name).First());
-            float w = Resources.Load<Weapon>(weaponPath).weight;
-
-            ///playerManager.GetWeapon(w);
+            string weaponName = t.name;
+            Weapon weapon = Resources.Load<Weapon>($"Weapons/{weaponName}");
+            if (weapon != null)
+            {
+                playerManager.GetWeapon(weapon);
+                Destroy(t.gameObject);
+            }
+            else
+            {
+                Debug.LogWarning($"Weapon resource not found: Weapons/{weaponName}");
+            }
         }
     }
 }
