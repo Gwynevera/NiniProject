@@ -30,11 +30,13 @@ public class PlayerAttack : MonoBehaviour
     float lerpSpeed = 10f;
     float chargedLerpSpeed = 25f;
 
+    [SerializeField]
     bool charged;
     public bool Charged => charged;
 
     float chargeMinTime = 0.25f;
-    float chargeTime = 1.25f;
+    float chargeTime = 0.75f;
+    [SerializeField]
     float chargeTimer;
 
     float chargeActiveTime = 0.25f;
@@ -43,6 +45,10 @@ public class PlayerAttack : MonoBehaviour
     float chargeMoveSpeed = 20f;
     float chargeFriction = 0.85f;
     public float ChargeMoveSpeed => chargeMoveSpeed;
+
+    [SerializeField]
+    bool tooMuchHold;
+    float holdTimer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -56,47 +62,65 @@ public class PlayerAttack : MonoBehaviour
     {
         if (GetAttackInput() || buffered)
         {
-            if (playerManager.CanDoAction(PlayerAction.Attack))
+            if (!tooMuchHold)
             {
-                playerManager.myState = PlayerState.Attacking;
-
-                attackTimer = 0;
-                buffered = false;
-                rb.linearVelocity = Vector3.zero;
-
-                attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
-
-                if (charged)
+                if (playerManager.CanDoAction(PlayerAction.Attack))
                 {
-                    rb.AddForce(transform.forward * chargeMoveSpeed, ForceMode.VelocityChange);
+                    playerManager.myState = PlayerState.Attacking;
+
+                    attackTimer = 0;
+                    buffered = false;
+                    rb.linearVelocity = Vector3.zero;
+
+                    attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
+
+                    if (charged)
+                    {
+                        rb.AddForce(transform.forward * chargeMoveSpeed, ForceMode.VelocityChange);
+                    }
+                }
+                else
+                {
+                    buffered = true;
+                    bufferTimer = 0;
                 }
             }
-            else
-            {
-                buffered = true;
-                bufferTimer = 0;
-            }
+
+            chargeTimer = 0;
+            tooMuchHold = false;
+            holdTimer = 0;
         }
 
-        if (IsAttackHold() && playerManager.CanDoAction(PlayerAction.Charge))
+        if (IsAttackHold())
         {
-            if (playerManager.myState != PlayerState.Charging)
+            if (playerManager.CanDoAction(PlayerAction.Charge))
             {
-                chargeTimer += Time.fixedDeltaTime;
-                if (chargeTimer >= chargeMinTime)
+                if (playerManager.myState != PlayerState.Charging)
                 {
-                    playerManager.myState = PlayerState.Charging;
+                    chargeTimer += Time.fixedDeltaTime;
+                    if (chargeTimer >= chargeMinTime)
+                    {
+                        playerManager.myState = PlayerState.Charging;
+                    }
+                }
+                else
+                {
+                    if (!charged)
+                    {
+                        chargeTimer += Time.fixedDeltaTime;
+                        if (chargeTimer >= chargeTime)
+                        {
+                            charged = true;
+                        }
+                    }
                 }
             }
             else
             {
-                if (!charged)
+                holdTimer += Time.fixedDeltaTime;
+                if (holdTimer >= chargeMinTime)
                 {
-                    chargeTimer += Time.fixedDeltaTime;
-                    if (chargeTimer >= chargeTime)
-                    {
-                        charged = true;
-                    }
+                    tooMuchHold = true;
                 }
             }
         }

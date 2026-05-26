@@ -41,8 +41,6 @@ public class PlayerMovement : MonoBehaviour
         {
             float speed = playerManager.myState == PlayerState.Charging ? chargeMoveSpeed : moveSpeed;
 
-            playerManager.myState = PlayerState.Moving;
-
             Vector3 desiredVelocity = movementInput * speed;
             Vector3 velocityChange = desiredVelocity - new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
