@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public enum PlayerState
 {
@@ -6,6 +7,7 @@ public enum PlayerState
     Moving,
     Attacking,
     Charging,
+    Throwing,
     Rolling,
     Hitstopping,
     Knockbacking,
@@ -16,6 +18,7 @@ public enum PlayerAction
     Move,
     Attack,
     Charge,
+    Throw,
     Roll,
     Hitstop,
     Knockback,
@@ -24,11 +27,44 @@ public enum PlayerAction
 
 public class PlayerManager : MonoBehaviour
 {
-    public PlayerState myState;
+    private PlayerState myState;
+    public PlayerState MyState
+    {
+        get => myState;
+        set
+        {
+            if (myState != value)
+            {
+                myState = value;
+                
+                switch (value)
+                {
+                    case PlayerState.Throwing:
+                        OnResetAttack?.Invoke();
+                        break;
+                    case PlayerState.Rolling:
+                        OnResetAttack?.Invoke();
+                        OnResetThrow?.Invoke();
+                        break;
+                    case PlayerState.Knockbacking:
+                    case PlayerState.Hitstopping:
+                        OnResetAttack?.Invoke();
+                        OnResetThrow?.Invoke();
+                        OnResetRoll?.Invoke();
+                        break;
+                }
+            }
+        }
+    }
+
+    public event Action OnResetAttack;
+    public event Action OnResetRoll;
+    public event Action OnResetThrow;
 
     public int health = 3;
     
     public Weapon myWeapon;
+    public Prop myProp;
 
     private void Awake()
     {
@@ -51,6 +87,7 @@ public class PlayerManager : MonoBehaviour
         {
             case PlayerAction.Move:
                 if (myState == PlayerState.Attacking
+                    || GetComponent<PlayerThrow>().Thrown
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)
@@ -59,6 +96,7 @@ public class PlayerManager : MonoBehaviour
 
             case PlayerAction.Attack:
                 if (myState == PlayerState.Attacking
+                    || myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)
@@ -66,6 +104,16 @@ public class PlayerManager : MonoBehaviour
                 return true;
 
             case PlayerAction.Charge:
+                if (myWeapon == null
+                    || myState == PlayerState.Attacking
+                    || myState == PlayerState.Throwing
+                    || myState == PlayerState.Rolling
+                    || myState == PlayerState.Hitstopping
+                    || myState == PlayerState.Knockbacking)
+                    return false;
+                return true;
+
+            case PlayerAction.Throw:
                 if (myWeapon == null
                     || myState == PlayerState.Attacking
                     || myState == PlayerState.Rolling
@@ -76,6 +124,7 @@ public class PlayerManager : MonoBehaviour
 
             case PlayerAction.Roll:
                 if (myState == PlayerState.Attacking
+                    || GetComponent<PlayerThrow>().Thrown
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)
@@ -97,6 +146,7 @@ public class PlayerManager : MonoBehaviour
             case PlayerAction.None:
                 if (myState == PlayerState.Attacking
                     || myState == PlayerState.Charging
+                    || myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)

@@ -1,0 +1,133 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerThrow : MonoBehaviour
+{
+    PlayerManager playerManager;
+    Rigidbody rb;
+
+    bool thrown;
+    public bool Thrown => thrown;
+
+    float throwRecoverTime = 1.5f;
+    float throwTimer;
+
+    Vector3 throwDir;
+
+    float throwSpeed = 5f;
+
+    void Awake()
+    {
+        playerManager = GetComponent<PlayerManager>();
+        rb = GetComponent<Rigidbody>();
+
+        playerManager.OnResetThrow += ResetThrow;
+    }
+
+    private void OnDestroy()
+    {
+        if (playerManager != null)
+        {
+            playerManager.OnResetThrow -= ResetThrow;
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (GetThrowInput())
+        {
+            if (playerManager.CanDoAction(PlayerAction.Throw))
+            {
+                thrown = true;
+                throwTimer = 0;
+
+                throwDir = GetComponent<PlayerMovement>().GetMovementInput();
+                if (throwDir != Vector3.zero)
+                {
+                    GetComponent<PlayerMovement>().DesiredForward = throwDir;
+                }
+                else
+                {
+                    throwDir = transform.forward;
+                }
+
+                rb.linearVelocity = Vector3.zero;
+                rb.AddForce(throwDir * throwSpeed, ForceMode.VelocityChange);
+
+                playerManager.DropWeapon();
+            }
+        }
+
+        if (IsThrowHold())
+        {
+            if (playerManager.myWeapon != null)
+            {
+                if (playerManager.CanDoAction(PlayerAction.Move))
+                {
+                    playerManager.MyState = PlayerState.Throwing;
+                }
+            } 
+            else
+            {
+
+            }
+        }
+
+        if (thrown)
+        {
+            throwTimer += Time.fixedDeltaTime;
+            if (throwTimer >= throwRecoverTime)
+            {
+                playerManager.MyState = PlayerState.Idle;
+                throwTimer = 0;
+                thrown = false;
+            }
+        }
+    }
+
+    bool GetThrowInput()
+    {
+        if (GetComponent<PlayerButtons>().playerInput == PlayerInput.Keyboard)
+        {
+            if (Keyboard.current != null && Keyboard.current[GetComponent<PlayerButtons>().throwKey].wasReleasedThisFrame)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (Gamepad.current != null && Gamepad.current[GetComponent<PlayerButtons>().throwButton].wasReleasedThisFrame)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool IsThrowHold()
+    {
+        if (GetComponent<PlayerButtons>().playerInput == PlayerInput.Keyboard)
+        {
+            if (Keyboard.current != null && Keyboard.current[GetComponent<PlayerButtons>().throwKey].isPressed)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (Gamepad.current != null && Gamepad.current[GetComponent<PlayerButtons>().throwButton].isPressed)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void ResetThrow()
+    {
+        throwTimer = 0;
+        thrown = false;
+    }
+}

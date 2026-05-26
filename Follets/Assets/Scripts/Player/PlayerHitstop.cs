@@ -49,12 +49,12 @@ public class PlayerHitstop : MonoBehaviour
                 {
                     damaged = false;
                     transform.position = originalPos;
-                    playerManager.myState = PlayerState.Knockbacking;
+                    playerManager.MyState = PlayerState.Knockbacking;
                 }
                 else
                 {
                     rb.linearVelocity = prevSpeed;
-                    playerManager.myState = prevState;
+                    playerManager.MyState = prevState;
                 }
             }
             else if (damaged)
@@ -67,7 +67,7 @@ public class PlayerHitstop : MonoBehaviour
 
     public void StartVictimHitstop(bool bigHit)
     {
-        playerManager.myState = PlayerState.Hitstopping;
+        playerManager.MyState = PlayerState.Hitstopping;
         
         originalPos = transform.position;
         damaged = true;
@@ -78,7 +78,7 @@ public class PlayerHitstop : MonoBehaviour
 
     public void StartBullyHitstop(PlayerState preState, Vector3 preSpeed, bool bigHit)
     {
-        playerManager.myState = PlayerState.Hitstopping;
+        playerManager.MyState = PlayerState.Hitstopping;
 
         originalPos = transform.position;
 

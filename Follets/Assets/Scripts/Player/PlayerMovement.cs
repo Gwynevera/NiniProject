@@ -1,20 +1,27 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
     PlayerManager playerManager;
     Rigidbody rb;
 
     float moveSpeed = 7.5f;
+    float slownMoveSpeed = 4f;
     float lerpSpeed = 15f;
+    float fastLerpSpeed = 20f;
 
     float minStickMovement = 0.05f;
 
     Vector3 movementInput;
 
-    float chargeMoveSpeed = 4f;
+    Vector3 desiredForward;
+    public Vector3 DesiredForward
+    {
+        get { return desiredForward; }
+        set { desiredForward = value; }
+    }
+
 
     void Awake()
     {
@@ -37,21 +44,34 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (movementInput != Vector3.zero && playerManager.CanDoAction(PlayerAction.Move))
+        if (movementInput != Vector3.zero)
         {
-            float speed = playerManager.myState == PlayerState.Charging ? chargeMoveSpeed : moveSpeed;
+            if (playerManager.CanDoAction(PlayerAction.Move))
+            {
+                float speed = playerManager.MyState == PlayerState.Charging || playerManager.MyState == PlayerState.Throwing ? slownMoveSpeed : moveSpeed;
 
-            Vector3 desiredVelocity = movementInput * speed;
-            Vector3 velocityChange = desiredVelocity - new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+                Vector3 desiredVelocity = movementInput * speed;
+                Vector3 velocityChange = desiredVelocity - new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
-            rb.AddForce(velocityChange, ForceMode.VelocityChange);
+                rb.AddForce(velocityChange, ForceMode.VelocityChange);
 
-            transform.forward = Vector3.Lerp(transform.forward, movementInput, lerpSpeed * Time.fixedDeltaTime);
+                transform.forward = Vector3.Lerp(transform.forward, movementInput, lerpSpeed * Time.fixedDeltaTime);
+            }
         }
-        else if (playerManager.CanDoAction(PlayerAction.None))
+        else
         {
-            playerManager.myState = PlayerState.Idle;
-            rb.linearVelocity = Vector3.zero;
+            if (playerManager.CanDoAction(PlayerAction.None))
+            {
+                playerManager.MyState = PlayerState.Idle;
+                rb.linearVelocity = Vector3.zero;
+            }
+        }
+
+        if (playerManager.MyState == PlayerState.Attacking
+            || playerManager.MyState == PlayerState.Rolling
+            || playerManager.MyState == PlayerState.Throwing)
+        {
+            transform.forward = Vector3.Lerp(transform.forward, desiredForward, fastLerpSpeed * Time.fixedDeltaTime);
         }
     }
 

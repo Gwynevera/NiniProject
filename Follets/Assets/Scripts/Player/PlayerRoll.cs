@@ -7,9 +7,8 @@ public class PlayerRoll : MonoBehaviour
     PlayerManager playerManager;
     Rigidbody rb;
 
-    bool rollOnce;
-    float rollSpeed = 20f;
-    float rollFriction = 0.875f;
+    float rollSpeed = 15f;
+    float rollFriction = 0.9f;
     Vector3 rollDir;
 
     float rollDuration = 0.45f;
@@ -22,6 +21,16 @@ public class PlayerRoll : MonoBehaviour
     {
         playerManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
+
+        playerManager.OnResetRoll += ResetRoll;
+    }
+
+    private void OnDestroy()
+    {
+        if (playerManager != null)
+        {
+            playerManager.OnResetRoll -= ResetRoll;
+        }
     }
 
     void Update()
@@ -34,16 +43,8 @@ public class PlayerRoll : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (playerManager.myState == PlayerState.Rolling)
+        if (playerManager.MyState == PlayerState.Rolling)
         {
-            if (rollOnce)
-            {
-                rollOnce = false;
-
-                rb.linearVelocity = Vector3.zero;
-                rb.AddForce(rollDir * rollSpeed, ForceMode.VelocityChange);
-            }
-
             rollTimer += Time.fixedDeltaTime;
             invencible = rollTimer < rollInvencible;
 
@@ -54,23 +55,30 @@ public class PlayerRoll : MonoBehaviour
 
             if (rollTimer >= rollDuration)
             {
-                playerManager.myState = PlayerState.Idle;
-                invencible = false;
+                playerManager.MyState = PlayerState.Idle;
             }
         }
     }
 
     void StartRoll()
     {
-        playerManager.myState = PlayerState.Rolling;
+        playerManager.MyState = PlayerState.Rolling;
 
-        rollTimer = 0f;
-        invencible = true;
-
-        rollDir = transform.forward.normalized;
-        rollOnce = true;
+        rollDir = GetComponent<PlayerMovement>().GetMovementInput();
+        if (rollDir != Vector3.zero)
+        {
+            GetComponent<PlayerMovement>().DesiredForward = rollDir;
+        }
+        else
+        {
+            rollDir = transform.forward;
+        }
 
         rb.linearVelocity = Vector3.zero;
+        rb.AddForce(rollDir * rollSpeed, ForceMode.VelocityChange);
+
+        invencible = true;
+        rollTimer = 0f;
     }
 
     bool GetRollInput()
@@ -91,5 +99,11 @@ public class PlayerRoll : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void ResetRoll()
+    {
+        invencible = false;
+        rollTimer = 0;
     }
 }

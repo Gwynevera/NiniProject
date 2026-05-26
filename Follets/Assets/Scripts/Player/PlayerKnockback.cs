@@ -49,7 +49,7 @@ public class PlayerKnockback : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (playerManager.myState == PlayerState.Knockbacking)
+        if (playerManager.MyState == PlayerState.Knockbacking)
         {
             if (knockbackState == KnockbackState.Impulse)
             {
@@ -68,7 +68,7 @@ public class PlayerKnockback : MonoBehaviour
 
                     if (knockbackType == KnockbackType.Small)
                     {
-                        playerManager.myState = PlayerState.Idle;
+                        playerManager.MyState = PlayerState.Idle;
                         GetComponent<Collider>().enabled = true;
                     }
                     else
@@ -94,7 +94,7 @@ public class PlayerKnockback : MonoBehaviour
                     recoverTimer = 0f;
                     knockbackState = KnockbackState.Impulse;
 
-                    playerManager.myState = PlayerState.Idle;
+                    playerManager.MyState = PlayerState.Idle;
                     GetComponent<Collider>().enabled = true;
                 }
             }

@@ -27,9 +27,6 @@ public class PlayerAttack : MonoBehaviour
     Vector3 chargeHitboxSize = new Vector3(1.5f, 1, 2.5f);
     float chargeHitboxOffset = 1;
 
-    float lerpSpeed = 10f;
-    float chargedLerpSpeed = 25f;
-
     [SerializeField]
     bool charged;
     public bool Charged => charged;
@@ -55,6 +52,16 @@ public class PlayerAttack : MonoBehaviour
     {
         playerManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
+
+        playerManager.OnResetAttack += ResetAttack;
+    }
+
+    private void OnDestroy()
+    {
+        if (playerManager != null)
+        {
+            playerManager.OnResetAttack -= ResetAttack;
+        }
     }
 
     // Update is called once per frame
@@ -66,17 +73,25 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (playerManager.CanDoAction(PlayerAction.Attack))
                 {
-                    playerManager.myState = PlayerState.Attacking;
+                    playerManager.MyState = PlayerState.Attacking;
 
                     attackTimer = 0;
                     buffered = false;
-                    rb.linearVelocity = Vector3.zero;
 
                     attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
+                    if (attackDirection != Vector3.zero)
+                    {
+                        GetComponent<PlayerMovement>().DesiredForward = attackDirection;
+                    }
+                    else
+                    {
+                        attackDirection = transform.forward;
+                    }
 
                     if (charged)
                     {
-                        rb.AddForce(transform.forward * chargeMoveSpeed, ForceMode.VelocityChange);
+                        rb.linearVelocity = Vector3.zero;
+                        rb.AddForce(attackDirection * chargeMoveSpeed, ForceMode.VelocityChange);
                     }
                 }
                 else
@@ -95,12 +110,12 @@ public class PlayerAttack : MonoBehaviour
         {
             if (playerManager.CanDoAction(PlayerAction.Charge))
             {
-                if (playerManager.myState != PlayerState.Charging)
+                if (playerManager.MyState != PlayerState.Charging)
                 {
                     chargeTimer += Time.fixedDeltaTime;
                     if (chargeTimer >= chargeMinTime)
                     {
-                        playerManager.myState = PlayerState.Charging;
+                        playerManager.MyState = PlayerState.Charging;
                     }
                 }
                 else
@@ -137,11 +152,9 @@ public class PlayerAttack : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (playerManager.myState == PlayerState.Attacking)
+        if (playerManager.MyState == PlayerState.Attacking)
         {
             attackTimer += Time.fixedDeltaTime;
-
-            transform.forward = Vector3.Lerp(transform.forward, attackDirection, ((charged || attackTimer < attackPrepareTime) ? chargedLerpSpeed : lerpSpeed) * Time.fixedDeltaTime);
 
             if (charged)
             {
@@ -157,7 +170,7 @@ public class PlayerAttack : MonoBehaviour
                     {
                         charged = false;
                         chargeTimer = 0;
-                        playerManager.myState = PlayerState.Idle;
+                        playerManager.MyState = PlayerState.Idle;
                     }
                 }
             }
@@ -170,7 +183,9 @@ public class PlayerAttack : MonoBehaviour
                         if (!hitboxActive)
                         {
                             hitboxActive = true;
-                            rb.AddForce(transform.forward * attackMoveSpeed, ForceMode.VelocityChange);
+
+                            rb.linearVelocity = Vector3.zero;
+                            rb.AddForce(attackDirection * attackMoveSpeed, ForceMode.VelocityChange);
                         }
 
                         HitboxCheck(KnockbackType.Small, hitboxOffset, hitboxSize);
@@ -183,7 +198,7 @@ public class PlayerAttack : MonoBehaviour
 
                     if (attackTimer >= attackPrepareTime + attackActiveTime + attackRecoverTime)
                     {
-                        playerManager.myState = PlayerState.Idle;
+                        playerManager.MyState = PlayerState.Idle;
                     }
                 }
             }
@@ -231,7 +246,7 @@ public class PlayerAttack : MonoBehaviour
 
     void HitboxCheck(KnockbackType knockType, float boxOffset, Vector3 boxSize)
     {
-        Vector3 boxCenter = transform.position + (boxOffset * transform.forward);
+        Vector3 boxCenter = transform.position + (boxOffset * attackDirection);
         Collider[] objects = Physics.OverlapBox(boxCenter, boxSize, transform.rotation);
 
         // Dibujar la caja del OverlapBox
@@ -251,13 +266,27 @@ public class PlayerAttack : MonoBehaviour
                             Vector3 dir = obj.transform.position - transform.position;
                             obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType, playerManager.myWeapon != null);
 
-                            GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.myState, rb.linearVelocity, knockType == KnockbackType.Big);
+                            GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
                         }
                     }
                 }
             }
         }
     }
+
+    private void ResetAttack()
+    {
+        hitboxActive = false;
+        charged = false;
+        buffered = false;
+        tooMuchHold = false;
+
+        attackTimer = 0;
+        chargeTimer = 0;
+        bufferTimer = 0;
+        holdTimer = 0;
+    }
+
 
     private void DrawOverlapBox(Vector3 center, Vector3 size, Quaternion rotation, Color color)
     {
