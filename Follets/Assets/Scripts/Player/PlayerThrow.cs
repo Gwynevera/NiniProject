@@ -1,20 +1,29 @@
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class PlayerThrow : MonoBehaviour
 {
     PlayerManager playerManager;
     Rigidbody rb;
 
+    public event Action OnThrowWeapon;
+
+    public GameObject weapon;
+
     bool thrown;
     public bool Thrown => thrown;
 
-    float throwRecoverTime = 1.5f;
+    float throwRecoverTime = 0.5f;
     float throwTimer;
 
     Vector3 throwDir;
+    float throwOffset = 1f;
+    float throwSpeed = 3f;
 
-    float throwSpeed = 5f;
+    float throwHoldTime = 1.5f;
+    float throwHoldExtraForce = 10f;
 
     void Awake()
     {
@@ -40,6 +49,14 @@ public class PlayerThrow : MonoBehaviour
             if (playerManager.CanDoAction(PlayerAction.Throw))
             {
                 thrown = true;
+                
+                if (throwTimer > throwHoldTime)
+                {
+                    throwTimer = throwHoldTime;
+                }
+
+                float throwExtraSpeed = throwTimer * throwHoldExtraForce / throwHoldTime;
+
                 throwTimer = 0;
 
                 throwDir = GetComponent<PlayerMovement>().GetMovementInput();
@@ -55,7 +72,11 @@ public class PlayerThrow : MonoBehaviour
                 rb.linearVelocity = Vector3.zero;
                 rb.AddForce(throwDir * throwSpeed, ForceMode.VelocityChange);
 
-                playerManager.DropWeapon();
+                weapon.GetComponent<WeaponObject>().ThrowWeapon(transform.position + (throwDir * throwOffset), throwDir, this.gameObject, throwExtraSpeed);
+                weapon = null;
+
+                OnThrowWeapon?.Invoke();
+                playerManager.myWeapon = null;
             }
         }
 
@@ -66,7 +87,11 @@ public class PlayerThrow : MonoBehaviour
                 if (playerManager.CanDoAction(PlayerAction.Move))
                 {
                     playerManager.MyState = PlayerState.Throwing;
+
+                    GetComponent<PlayerMovement>().DesiredForward = GetComponent<PlayerMovement>().GetMovementInput();
                 }
+
+                throwTimer += Time.fixedDeltaTime;
             } 
             else
             {

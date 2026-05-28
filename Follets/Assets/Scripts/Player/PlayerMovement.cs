@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
     float lerpSpeed = 15f;
     float fastLerpSpeed = 20f;
 
-    float minStickMovement = 0.05f;
+    float minStickMovement = 0.1f;
 
     Vector3 movementInput;
 
@@ -62,7 +62,6 @@ public class PlayerMovement : MonoBehaviour
         {
             if (playerManager.CanDoAction(PlayerAction.None))
             {
-                playerManager.MyState = PlayerState.Idle;
                 rb.linearVelocity = Vector3.zero;
             }
         }
@@ -96,6 +95,13 @@ public class PlayerMovement : MonoBehaviour
 
             movement = new Vector3(gamepadMove.x, 0, gamepadMove.y);
         }
+
+        // Marcos
+        ///movement.x += Input.GetAxis("Horizontal");
+        ///movement.z += Input.GetAxis("Vertical");
+
+        //if (movement.magnitude < minStickMovement)
+            //movement = Vector3.zero;
 
         return movement;
     }

@@ -7,12 +7,12 @@ public class PlayerRoll : MonoBehaviour
     PlayerManager playerManager;
     Rigidbody rb;
 
-    float rollSpeed = 15f;
-    float rollFriction = 0.9f;
+    float rollSpeed = 20f;
+    float rollFriction = 0.875f;
     Vector3 rollDir;
 
-    float rollDuration = 0.45f;
-    float rollInvencible = 0.2f;
+    float rollDuration = 0.5f;
+    float rollInvencible = 0.3f;
     float rollTimer = 0f;
 
     public bool invencible = false;
@@ -48,7 +48,11 @@ public class PlayerRoll : MonoBehaviour
             rollTimer += Time.fixedDeltaTime;
             invencible = rollTimer < rollInvencible;
 
-            if (!invencible)
+            if (invencible)
+            {
+                Utils.DrawOverlapBox(transform.position, Vector3.one, transform.rotation, Color.yellow);
+            }
+            else
             {
                 rb.linearVelocity *= rollFriction;
             }

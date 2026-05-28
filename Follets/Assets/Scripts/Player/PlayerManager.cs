@@ -60,10 +60,13 @@ public class PlayerManager : MonoBehaviour
     public event Action OnResetAttack;
     public event Action OnResetRoll;
     public event Action OnResetThrow;
+    public event Action OnGetWeapon;
+    public event Action OnDropWeapon;
 
     public int health = 3;
+    public float width = 1;
     
-    public Weapon myWeapon;
+    public WeaponObject myWeapon;
     public Prop myProp;
 
     private void Awake()
@@ -71,14 +74,21 @@ public class PlayerManager : MonoBehaviour
 
     }
 
-    public void GetWeapon(Weapon weapon)
+    public void GetWeapon(WeaponObject weapon)
     {
         if (myWeapon == null)
-            myWeapon = weapon;
-    }
-    public void DropWeapon()
-    {
-        myWeapon = null;
+        {
+
+        }
+        else
+        {
+            // Drop current
+            OnDropWeapon?.Invoke();
+        }
+        
+        myWeapon = weapon;
+
+        OnGetWeapon?.Invoke();
     }
 
     public bool CanDoAction(PlayerAction action)
@@ -145,8 +155,6 @@ public class PlayerManager : MonoBehaviour
 
             case PlayerAction.None:
                 if (myState == PlayerState.Attacking
-                    || myState == PlayerState.Charging
-                    || myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)

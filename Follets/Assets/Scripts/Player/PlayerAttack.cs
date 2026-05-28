@@ -13,19 +13,43 @@ public class PlayerAttack : MonoBehaviour
     Vector3 attackDirection;
     float attackTimer;
 
-    float attackPrepareTime = 0.1f;
-    float attackActiveTime = 0.15f;
-    float attackRecoverTime = 0.2f;
+    float attackPrepareTime;
+    float minAttackPrepareTime = 0.1f;
+    float maxAttackPrepareTime = 0.35f;
+    float attackPrepareTimeBase = 0.2f;
+    float attackPrepareMult = 0.55f;
 
-    float attackMoveSpeed = 10f;
+    float attackActiveTime;
+    float minAttackActiveTime = 0.1f;
+    float maxAttackActiveTime = 0.25f;
+    float attackActiveTimeBase = 0.15f;
+    float attackActiveMult = 0.5f;
+
+    float attackRecoverTime;
+    float minAttackRecoverTime = 0.1f;
+    float maxAttackRecoverTime = 0.5f;
+    float attackRecoverTimeBase = 0.25f;
+    float attackRecoverMult = 0.35f;
+
+    float attackMoveSpeed;
+    float minAttackSpeed = 8.75f;
+    float maxAttackSpeed = 15f;
+    float attackMoveSpeedBase = 10f;
+    float attackMoveSpeedMult = 0.75f;
+
     float attackFriction = 0.65f;
     public float AttackMoveSpeed => attackMoveSpeed;
 
     bool hitboxActive;
-    float hitboxOffset = 0.75f;
-    Vector3 hitboxSize = new Vector3(1, 1, 1);
-    Vector3 chargeHitboxSize = new Vector3(1.5f, 1, 2.5f);
-    float chargeHitboxOffset = 1;
+    Weapon weaponBase;
+    Vector3 hitBox;
+    float swingOffset;
+    Vector3 swingHitBoxBase = new Vector3(2, 1, 1.75f);
+    Vector2 swingHitBoxMult = new Vector2(0.25f, 0.65f);
+    Vector3 chargeHitBox;
+    float chargeOffset;
+    Vector3 chargeHitBoxBase = new Vector3(2, 1, 3);
+    Vector3 chargeHitBoxMult = new Vector2(0.15f, 0.45f);
 
     [SerializeField]
     bool charged;
@@ -36,24 +60,44 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     float chargeTimer;
 
-    float chargeActiveTime = 0.25f;
-    float chargeRecoveryTime = 0.65f;
+    float chargeActiveTime;
+    float chargeActiveTimeBase = 0.25f;
+    float chargeActiveMult = 0.5f;
 
-    float chargeMoveSpeed = 20f;
+    float chargeRecoveryTime;
+    float chargeRecoveryTimeBase = 0.65f;
+    float chargeRecoveryMult = 0.15f;
+
+    float chargeMoveSpeed;
+    float minChargeSpeed = 12f;
+    float chargeMoveSpeedBase = 20f;
+    float chargeMoveSpeedMult = 0.5f;
+
     float chargeFriction = 0.85f;
+
     public float ChargeMoveSpeed => chargeMoveSpeed;
 
     [SerializeField]
     bool tooMuchHold;
     float holdTimer;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         playerManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
 
+        weaponBase = new Weapon();
+
+        attackPrepareTime = attackPrepareTimeBase;
+        attackActiveTime = attackActiveTimeBase;
+        attackRecoverTime = attackRecoverTimeBase;
+
+        attackMoveSpeed = attackMoveSpeedBase;
+
         playerManager.OnResetAttack += ResetAttack;
+        playerManager.OnGetWeapon += UpdateAttackStats;
+        playerManager.OnDropWeapon += ResetAttackStats;
+        GetComponent<PlayerThrow>().OnThrowWeapon += ResetAttackStats;
     }
 
     private void OnDestroy()
@@ -61,6 +105,9 @@ public class PlayerAttack : MonoBehaviour
         if (playerManager != null)
         {
             playerManager.OnResetAttack -= ResetAttack;
+            playerManager.OnGetWeapon -= UpdateAttackStats;
+            playerManager.OnDropWeapon -= ResetAttackStats;
+            GetComponent<PlayerThrow>().OnThrowWeapon -= ResetAttackStats;
         }
     }
 
@@ -78,15 +125,12 @@ public class PlayerAttack : MonoBehaviour
                     attackTimer = 0;
                     buffered = false;
 
-                    attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
-                    if (attackDirection != Vector3.zero)
+                    attackDirection = GetComponent<PlayerMovement>().GetMovementInput().normalized;
+                    if (attackDirection == Vector3.zero)
                     {
-                        GetComponent<PlayerMovement>().DesiredForward = attackDirection;
+                        attackDirection = transform.forward.normalized;
                     }
-                    else
-                    {
-                        attackDirection = transform.forward;
-                    }
+                    GetComponent<PlayerMovement>().DesiredForward = attackDirection;
 
                     if (charged)
                     {
@@ -101,9 +145,10 @@ public class PlayerAttack : MonoBehaviour
                 }
             }
 
-            chargeTimer = 0;
             tooMuchHold = false;
             holdTimer = 0;
+            chargeTimer = 0;
+            if (playerManager.MyState != PlayerState.Attacking) charged = false;
         }
 
         if (IsAttackHold())
@@ -160,7 +205,7 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (attackTimer < chargeActiveTime)
                 {
-                    HitboxCheck(KnockbackType.Big, chargeHitboxOffset, chargeHitboxSize);
+                    HitboxCheck(KnockbackType.Big, chargeOffset, chargeHitBox);
                 }
                 else
                 {
@@ -188,7 +233,7 @@ public class PlayerAttack : MonoBehaviour
                             rb.AddForce(attackDirection * attackMoveSpeed, ForceMode.VelocityChange);
                         }
 
-                        HitboxCheck(KnockbackType.Small, hitboxOffset, hitboxSize);
+                        HitboxCheck(KnockbackType.Small, playerManager.myWeapon == null ? 1 : swingOffset, playerManager.myWeapon == null ? Vector3.one : hitBox);
                     }
                     else if (attackTimer >= attackPrepareTime + attackActiveTime)
                     {
@@ -200,6 +245,10 @@ public class PlayerAttack : MonoBehaviour
                     {
                         playerManager.MyState = PlayerState.Idle;
                     }
+                }
+                else
+                {
+                    rb.linearVelocity *= attackFriction;
                 }
             }
         }
@@ -250,7 +299,7 @@ public class PlayerAttack : MonoBehaviour
         Collider[] objects = Physics.OverlapBox(boxCenter, boxSize, transform.rotation);
 
         // Dibujar la caja del OverlapBox
-        DrawOverlapBox(boxCenter, boxSize, transform.rotation, knockType == KnockbackType.Big ? Color.red : Color.blue);
+        Utils.DrawOverlapBox(boxCenter, boxSize, transform.rotation, knockType == KnockbackType.Big ? Color.red : Color.blue);
 
         if (objects != null && objects.Length > 0)
         {
@@ -274,6 +323,68 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    private void ResetAttackStats()
+    {
+        attackPrepareTime = attackPrepareTimeBase;
+        attackActiveTime = attackActiveTimeBase;
+        attackRecoverTime = attackRecoverTimeBase;
+        attackMoveSpeed = attackMoveSpeedBase;
+    }
+
+    private void UpdateAttackStats()
+    {
+        float wWidth = playerManager.myWeapon.weapon.width;
+        float wLength = playerManager.myWeapon.weapon.length;
+        float wWeight = playerManager.myWeapon.weapon.weight;
+
+        attackPrepareTime = wWeight * attackPrepareTimeBase / weaponBase.weight;
+        float prepDiff = attackPrepareTime - attackPrepareTimeBase;
+        attackPrepareTime = attackPrepareTimeBase + (prepDiff * attackPrepareMult);
+        if (attackPrepareTime < minAttackPrepareTime) attackPrepareTime = minAttackPrepareTime;
+        if (attackPrepareTime > maxAttackPrepareTime) attackPrepareTime = maxAttackPrepareTime;
+
+        attackActiveTime = wWeight * attackActiveTimeBase / weaponBase.weight;
+        float activeDiff = attackActiveTime - attackActiveTimeBase;
+        attackActiveTime = attackActiveTimeBase + (activeDiff * attackActiveMult);
+        if (attackActiveTime < minAttackActiveTime) attackActiveTime = minAttackActiveTime;
+        if (attackActiveTime > maxAttackActiveTime) attackActiveTime = maxAttackActiveTime;
+
+        attackRecoverTime = wWeight * attackRecoverTimeBase / weaponBase.weight;
+        float recoverDiff = attackRecoverTime - attackRecoverTimeBase;
+        attackRecoverTime = attackRecoverTimeBase + (recoverDiff * attackRecoverMult);
+        if (attackRecoverTime < minAttackRecoverTime) attackRecoverTime = minAttackRecoverTime;
+        if (attackRecoverTime > maxAttackRecoverTime) attackRecoverTime = maxAttackRecoverTime;
+
+        attackMoveSpeed = wWeight * attackMoveSpeedBase / weaponBase.weight;
+        float moveDiff = attackMoveSpeedBase - attackMoveSpeed;
+        attackMoveSpeed = attackMoveSpeedBase + (moveDiff * attackMoveSpeedMult);
+        if (attackMoveSpeed < minAttackSpeed) attackMoveSpeed = minAttackSpeed;
+        if (attackMoveSpeed > maxAttackSpeed) attackMoveSpeed = maxAttackSpeed;
+
+        chargeActiveTime = wWeight * chargeActiveTimeBase / weaponBase.weight;
+        float chActiveDiff = chargeActiveTime - chargeActiveTimeBase;
+        chargeActiveTime = chargeActiveTimeBase + (chActiveDiff * chargeActiveMult);
+
+        chargeRecoveryTime = wWeight * chargeRecoveryTimeBase / weaponBase.weight;
+        float chRecoverDiff = chargeRecoveryTime - chargeRecoveryTimeBase;
+        chargeRecoveryTime = chargeRecoveryTimeBase + (chRecoverDiff * chargeRecoveryMult);
+
+        chargeMoveSpeed = wWeight * chargeMoveSpeedBase / weaponBase.weight;
+        float chMoveDiff = chargeMoveSpeedBase - chargeMoveSpeed;
+        chargeMoveSpeed = chargeMoveSpeedBase + (chMoveDiff * chargeMoveSpeedMult);
+        if (chargeMoveSpeed < minChargeSpeed) chargeMoveSpeed = minChargeSpeed;
+
+        hitBox = new Vector3(wWidth * swingHitBoxBase.x / weaponBase.width, 1, wLength * swingHitBoxBase.z / weaponBase.length);
+        Vector3 swingDiff = hitBox - swingHitBoxBase;
+        hitBox = swingHitBoxBase + new Vector3(swingDiff.x * swingHitBoxMult.x, 0, swingDiff.z * swingHitBoxMult.y);
+        swingOffset = (playerManager.width / 2) + (hitBox.z / 2);
+
+        chargeHitBox = new Vector3(wWidth * chargeHitBoxBase.x / weaponBase.width, 1, wLength * chargeHitBoxBase.z / weaponBase.length);
+        Vector3 chargeDiff = chargeHitBox - chargeHitBoxBase;
+        chargeHitBox = chargeHitBoxBase + new Vector3(chargeDiff.x * chargeHitBoxMult.x, 0, chargeDiff.z * chargeHitBoxMult.y);
+        chargeOffset = (playerManager.width / 2) + (chargeHitBox.z / 2);
+    }
+
     private void ResetAttack()
     {
         hitboxActive = false;
@@ -285,58 +396,5 @@ public class PlayerAttack : MonoBehaviour
         chargeTimer = 0;
         bufferTimer = 0;
         holdTimer = 0;
-    }
-
-
-    private void DrawOverlapBox(Vector3 center, Vector3 size, Quaternion rotation, Color color)
-    {
-        // Calcula los 8 vértices de la caja
-        Vector3 halfSize = size * 0.5f;
-        Vector3[] corners = new Vector3[8]
-        {
-            new Vector3(-halfSize.x, -halfSize.y, -halfSize.z),
-            new Vector3(halfSize.x, -halfSize.y, -halfSize.z),
-            new Vector3(halfSize.x, halfSize.y, -halfSize.z),
-            new Vector3(-halfSize.x, halfSize.y, -halfSize.z),
-            new Vector3(-halfSize.x, -halfSize.y, halfSize.z),
-            new Vector3(halfSize.x, -halfSize.y, halfSize.z),
-            new Vector3(halfSize.x, halfSize.y, halfSize.z),
-            new Vector3(-halfSize.x, halfSize.y, halfSize.z)
-        };
-
-        // Aplica rotación y posición a cada esquina
-        for (int i = 0; i < corners.Length; i++)
-        {
-            corners[i] = center + rotation * corners[i];
-        }
-
-        // Dibuja las 12 líneas (bordes de la caja)
-        // Cara frontal
-        Debug.DrawLine(corners[0], corners[1], color);
-        Debug.DrawLine(corners[1], corners[2], color);
-        Debug.DrawLine(corners[2], corners[3], color);
-        Debug.DrawLine(corners[3], corners[0], color);
-
-        // Cara trasera
-        Debug.DrawLine(corners[4], corners[5], color);
-        Debug.DrawLine(corners[5], corners[6], color);
-        Debug.DrawLine(corners[6], corners[7], color);
-        Debug.DrawLine(corners[7], corners[4], color);
-
-        // Conexiones entre caras
-        Debug.DrawLine(corners[0], corners[4], color);
-        Debug.DrawLine(corners[1], corners[5], color);
-        Debug.DrawLine(corners[2], corners[6], color);
-        Debug.DrawLine(corners[3], corners[7], color);
-    }
-
-    private void OnDrawGizmos()
-    {
-        //if (playerManager.myState == PlayerState.Attacking)
-        {
-            //Vector3 boxSize = charged ? chargeHitboxSize : hitboxSize;
-            //float boxOffset = charged ? chargeHitboxOffset : hitboxOffset;
-            //Gizmos.DrawWireCube(transform.position + (boxOffset * transform.forward), boxSize);
-        }
     }
 }

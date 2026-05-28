@@ -23,31 +23,42 @@ public class PlayerCollision : MonoBehaviour
             Vector3 knockDir = transform.position - c.transform.position;
             knockDir.y = 0;
 
-            if (playerManager.CanDoAction(PlayerAction.Knockback)
-                && !GetComponent<PlayerRoll>().invencible)
+            SetupKnockback(knockDir);
+        }
+    }
+
+    void OnTriggerEnter(Collider t)
+    {
+        if (t != null && t.CompareTag("Weapon"))
+        {
+            if (t.gameObject.GetComponent<WeaponObject>().player == null)
             {
-                //transform.forward = -knockDir.normalized;
-                ///GetComponent<PlayerKnockback>().SetKnockbackDamage(knockDir, KnockbackType.Big);
-                Debug.Log("Attacked");
+                playerManager.GetWeapon(t.gameObject.GetComponent<WeaponObject>());
+
+                t.gameObject.SetActive(false);
+                t.transform.parent = this.gameObject.transform;
+                t.transform.localPosition = Vector3.zero;
+
+                GetComponent<PlayerThrow>().weapon = t.gameObject;
+                
+            }
+            else if (t.gameObject.GetComponent<WeaponObject>().player != gameObject)
+            {
+                Vector3 knockDir = transform.position - t.transform.position;
+                knockDir.y = 0;
+
+                SetupKnockback(knockDir);
             }
         }
     }
 
-    private void OnTriggerEnter(Collider t)
+    void SetupKnockback(Vector3 d)
     {
-        if (t != null && t.CompareTag("Weapon"))
+        if (playerManager.CanDoAction(PlayerAction.Knockback)
+            && !GetComponent<PlayerRoll>().invencible)
         {
-            string weaponName = t.name;
-            Weapon weapon = Resources.Load<Weapon>($"Weapons/{weaponName}");
-            if (weapon != null)
-            {
-                playerManager.GetWeapon(weapon);
-                Destroy(t.gameObject);
-            }
-            else
-            {
-                Debug.LogWarning($"Weapon resource not found: Weapons/{weaponName}");
-            }
+            transform.forward = -d.normalized;
+            GetComponent<PlayerKnockback>().SetKnockbackDamage(d, KnockbackType.Big);
         }
     }
 }
