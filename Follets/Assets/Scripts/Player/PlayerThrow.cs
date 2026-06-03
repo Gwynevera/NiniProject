@@ -10,8 +10,6 @@ public class PlayerThrow : MonoBehaviour
 
     public event Action OnThrowWeapon;
 
-    public GameObject weapon;
-
     bool thrown;
     public bool Thrown => thrown;
 
@@ -23,7 +21,7 @@ public class PlayerThrow : MonoBehaviour
     float throwSpeed = 3f;
 
     float throwHoldTime = 1.5f;
-    float throwHoldExtraForce = 10f;
+    float throwHoldExtraForce = 5f;
 
     void Awake()
     {
@@ -59,7 +57,7 @@ public class PlayerThrow : MonoBehaviour
 
                 throwTimer = 0;
 
-                throwDir = GetComponent<PlayerMovement>().GetMovementInput();
+                throwDir = GetComponent<PlayerMovement>().GetMovementInput().normalized;
                 if (throwDir != Vector3.zero)
                 {
                     GetComponent<PlayerMovement>().DesiredForward = throwDir;
@@ -72,11 +70,10 @@ public class PlayerThrow : MonoBehaviour
                 rb.linearVelocity = Vector3.zero;
                 rb.AddForce(throwDir * throwSpeed, ForceMode.VelocityChange);
 
-                weapon.GetComponent<WeaponObject>().ThrowWeapon(transform.position + (throwDir * throwOffset), throwDir, this.gameObject, throwExtraSpeed);
-                weapon = null;
+                playerManager.myWeapon.GetComponent<WeaponObject>().ThrowWeapon(transform.position + (throwDir * throwOffset), throwDir, this.gameObject, throwExtraSpeed);
+                playerManager.myWeapon = null;
 
                 OnThrowWeapon?.Invoke();
-                playerManager.myWeapon = null;
             }
         }
 
@@ -88,7 +85,7 @@ public class PlayerThrow : MonoBehaviour
                 {
                     playerManager.MyState = PlayerState.Throwing;
 
-                    GetComponent<PlayerMovement>().DesiredForward = GetComponent<PlayerMovement>().GetMovementInput();
+                    GetComponent<PlayerMovement>().DesiredForward = GetComponent<PlayerMovement>().GetMovementInput().normalized;
                 }
 
                 throwTimer += Time.fixedDeltaTime;

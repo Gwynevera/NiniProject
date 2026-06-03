@@ -38,6 +38,7 @@ public class PlayerAttack : MonoBehaviour
     float attackMoveSpeedMult = 0.75f;
 
     float attackFriction = 0.65f;
+    float attackRotate = 0.5f;
     public float AttackMoveSpeed => attackMoveSpeed;
 
     bool hitboxActive;
@@ -138,7 +139,7 @@ public class PlayerAttack : MonoBehaviour
                         rb.AddForce(attackDirection * chargeMoveSpeed, ForceMode.VelocityChange);
                     }
                 }
-                else
+                else if (attackTimer >= attackPrepareTime + (attackActiveTime/2))
                 {
                     buffered = true;
                     bufferTimer = 0;
@@ -228,6 +229,16 @@ public class PlayerAttack : MonoBehaviour
                         if (!hitboxActive)
                         {
                             hitboxActive = true;
+
+                            attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
+                            if (attackDirection == Vector3.zero)
+                            {
+                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = transform.forward;
+                            }
+                            else
+                            {
+                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = Vector3.Lerp(GetComponent<PlayerMovement>().DesiredForward, attackDirection, attackRotate);
+                            }
 
                             rb.linearVelocity = Vector3.zero;
                             rb.AddForce(attackDirection * attackMoveSpeed, ForceMode.VelocityChange);
@@ -333,9 +344,9 @@ public class PlayerAttack : MonoBehaviour
 
     private void UpdateAttackStats()
     {
-        float wWidth = playerManager.myWeapon.weapon.width;
-        float wLength = playerManager.myWeapon.weapon.length;
-        float wWeight = playerManager.myWeapon.weapon.weight;
+        float wWidth = playerManager.myWeapon.GetComponent<WeaponObject>().weapon.width;
+        float wLength = playerManager.myWeapon.GetComponent<WeaponObject>().weapon.length;
+        float wWeight = playerManager.myWeapon.GetComponent<WeaponObject>().weapon.weight;
 
         attackPrepareTime = wWeight * attackPrepareTimeBase / weaponBase.weight;
         float prepDiff = attackPrepareTime - attackPrepareTimeBase;

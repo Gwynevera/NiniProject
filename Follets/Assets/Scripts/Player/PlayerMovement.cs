@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (playerManager.CanDoAction(PlayerAction.Move))
         {
-            movementInput = GetMovementInput();
+            movementInput = GetMovementInput().normalized;
         }
     }
 
@@ -54,7 +54,6 @@ public class PlayerMovement : MonoBehaviour
                 Vector3 velocityChange = desiredVelocity - new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
                 rb.AddForce(velocityChange, ForceMode.VelocityChange);
-
                 transform.forward = Vector3.Lerp(transform.forward, movementInput, lerpSpeed * Time.fixedDeltaTime);
             }
         }

@@ -22,16 +22,26 @@ public class PlayerButtons : MonoBehaviour
     public GamepadButton throwButton;
     public Key throwKey;
 
+    public GamepadButton grabButton;
+    public Key grabKey;
+
+    public GamepadButton parryButton;
+    public Key parryKey;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         attackButton = GamepadButton.West;
         throwButton = GamepadButton.North;
         rollButton = GamepadButton.East;
+        grabButton = GamepadButton.South;
+        parryButton = GamepadButton.LeftShoulder;
 
         attackKey = Key.J;
         throwKey = Key.U;
         rollKey = Key.Space;
+        grabKey = Key.E;
+        parryKey = Key.Q;
     }
 
     void Start()
