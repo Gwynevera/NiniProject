@@ -321,6 +321,7 @@ GameObject:
   - component: {fileID: 365369808}
   - component: {fileID: 365369809}
   - component: {fileID: 365369818}
+  - component: {fileID: 365369819}
   - component: {fileID: 365369811}
   - component: {fileID: 365369814}
   - component: {fileID: 365369817}
@@ -540,6 +541,10 @@ MonoBehaviour:
   rollKey: 0
   throwButton: 0
   throwKey: 0
+  grabButton: 0
+  grabKey: 0
+  parryButton: 0
+  parryKey: 0
 --- !u!114 &365369816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -556,6 +561,7 @@ MonoBehaviour:
   width: 1
   myWeapon: {fileID: 0}
   myProp: {fileID: 0}
+  weaponHandle: {fileID: 0}
 --- !u!114 &365369817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -568,6 +574,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55b07f87409d22b4895f039398c01724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHitstop
+  bigHitstopTime: 1
+  smallHitstopTime: 0.5
 --- !u!114 &365369818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -580,7 +588,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e625e8c9279e244482add370cd0afc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerThrow
-  weapon: {fileID: 0}
+--- !u!114 &365369819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365369802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfdb91c9b86103d4a958067ec8b86624, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerGrab
 --- !u!1 &369743851
 GameObject:
   m_ObjectHideFlags: 0

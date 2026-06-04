@@ -139,7 +139,7 @@ public class PlayerAttack : MonoBehaviour
                         rb.AddForce(attackDirection * chargeMoveSpeed, ForceMode.VelocityChange);
                     }
                 }
-                else if (attackTimer >= attackPrepareTime + (attackActiveTime / 2))
+                else if (attackTimer >= attackPrepareTime + (attackActiveTime/2))
                 {
                     buffered = true;
                     bufferTimer = 0;
@@ -229,6 +229,16 @@ public class PlayerAttack : MonoBehaviour
                         if (!hitboxActive)
                         {
                             hitboxActive = true;
+
+                            /*attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
+                            if (attackDirection == Vector3.zero)
+                            {
+                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = transform.forward;
+                            }
+                            else
+                            {
+                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = Vector3.Lerp(GetComponent<PlayerMovement>().DesiredForward, attackDirection, attackRotate);
+                            }*/
 
                             rb.linearVelocity = Vector3.zero;
                             rb.AddForce(attackDirection * attackMoveSpeed, ForceMode.VelocityChange);
