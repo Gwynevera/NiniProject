@@ -68,7 +68,7 @@ public class PlayerRoll : MonoBehaviour
     {
         playerManager.MyState = PlayerState.Rolling;
 
-        rollDir = GetComponent<PlayerMovement>().GetMovementInput();
+        rollDir = GetComponent<PlayerMovement>().GetMovementInput().normalized;
         if (rollDir != Vector3.zero)
         {
             GetComponent<PlayerMovement>().DesiredForward = rollDir;

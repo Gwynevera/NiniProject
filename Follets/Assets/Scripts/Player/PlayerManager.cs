@@ -36,7 +36,7 @@ public class PlayerManager : MonoBehaviour
             if (myState != value)
             {
                 myState = value;
-                
+
                 switch (value)
                 {
                     case PlayerState.Throwing:
@@ -48,9 +48,12 @@ public class PlayerManager : MonoBehaviour
                         break;
                     case PlayerState.Knockbacking:
                     case PlayerState.Hitstopping:
-                        OnResetAttack?.Invoke();
-                        OnResetThrow?.Invoke();
-                        OnResetRoll?.Invoke();
+                        if (GetComponent<PlayerHitstop>().Damaged)
+                        {
+                            OnResetAttack?.Invoke();
+                            OnResetThrow?.Invoke();
+                            OnResetRoll?.Invoke();
+                        }
                         break;
                 }
             }
@@ -65,16 +68,18 @@ public class PlayerManager : MonoBehaviour
 
     public int health = 3;
     public float width = 1;
-    
-    public WeaponObject myWeapon;
+
+    public GameObject myWeapon;
     public Prop myProp;
+
+    public Transform weaponHandle;
 
     private void Awake()
     {
 
     }
 
-    public void GetWeapon(WeaponObject weapon)
+    public void GetWeapon(GameObject weapon)
     {
         if (myWeapon == null)
         {
@@ -83,11 +88,11 @@ public class PlayerManager : MonoBehaviour
         else
         {
             // Drop current
+            myWeapon.GetComponent<WeaponObject>().DropWeapon(myWeapon.transform);
             OnDropWeapon?.Invoke();
         }
-        
-        myWeapon = weapon;
 
+        myWeapon = weapon;
         OnGetWeapon?.Invoke();
     }
 

@@ -13,52 +13,83 @@ public class PlayerCollision : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void OnCollisionEnter(Collision c)
     {
-        if (c != null && c.collider.CompareTag("Attack"))
+        if (c != null)
         {
-            Vector3 knockDir = transform.position - c.transform.position;
-            knockDir.y = 0;
+            bool yes = false;
 
-            SetupKnockback(knockDir);
+            if (c.collider.CompareTag("Attack"))
+            {
+                yes = true;
+            }
+            else if (c.collider.CompareTag("Weapon"))
+            {
+                if (c.collider.gameObject.GetComponent<WeaponObject>().player != this.gameObject)
+                {
+                    c.collider.gameObject.GetComponent<WeaponObject>().SetTimestop(GetComponent<PlayerHitstop>().smallHitstopTime);
+                    yes = true;
+                }
+                else
+                {
+                    HandleWeapon(c.gameObject);
+                }
+            }
+
+            if (yes)
+            {
+                Vector3 knockDir = transform.position - c.transform.position;
+                knockDir.y = 0;
+
+                SetupKnockback(knockDir, KnockbackType.Small);
+            }
         }
     }
 
     void OnTriggerEnter(Collider t)
     {
-        if (t != null && t.CompareTag("Weapon"))
+        if (t != null
+            && t.CompareTag("Weapon")
+            && playerManager.CanDoAction(PlayerAction.Move)
+            && playerManager.myWeapon == null)
         {
-            if (t.gameObject.GetComponent<WeaponObject>().player == null)
-            {
-                playerManager.GetWeapon(t.gameObject.GetComponent<WeaponObject>());
-
-                t.gameObject.SetActive(false);
-                t.transform.parent = this.gameObject.transform;
-                t.transform.localPosition = Vector3.zero;
-
-                GetComponent<PlayerThrow>().weapon = t.gameObject;
-                
-            }
-            else if (t.gameObject.GetComponent<WeaponObject>().player != gameObject)
-            {
-                Vector3 knockDir = transform.position - t.transform.position;
-                knockDir.y = 0;
-
-                SetupKnockback(knockDir);
-            }
+            HandleWeapon(t.gameObject);
         }
     }
 
-    void SetupKnockback(Vector3 d)
+    void OnTriggerStay(Collider t)
+    {
+        if (t != null
+            && t.CompareTag("Weapon")
+            && playerManager.CanDoAction(PlayerAction.Move)
+            && playerManager.myWeapon == null)
+        {
+            HandleWeapon(t.gameObject);
+        }
+    }
+
+    public void HandleWeapon(GameObject g)
+    {
+        if (g.GetComponent<WeaponObject>().player == null)
+        {
+            playerManager.GetWeapon(g);
+
+            g.transform.parent = playerManager.weaponHandle;
+            g.GetComponent<WeaponObject>().ResetWeapon();
+            g.GetComponent<WeaponObject>().player = this.gameObject;
+        }
+    }
+
+    void SetupKnockback(Vector3 d, KnockbackType k)
     {
         if (playerManager.CanDoAction(PlayerAction.Knockback)
             && !GetComponent<PlayerRoll>().invencible)
         {
             transform.forward = -d.normalized;
-            GetComponent<PlayerKnockback>().SetKnockbackDamage(d, KnockbackType.Big);
+            GetComponent<PlayerKnockback>().SetKnockbackDamage(d, k);
         }
     }
 }

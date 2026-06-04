@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (playerManager.CanDoAction(PlayerAction.Move))
         {
-            movementInput = GetMovementInput();
+            movementInput = GetMovementInput().normalized;
         }
     }
 

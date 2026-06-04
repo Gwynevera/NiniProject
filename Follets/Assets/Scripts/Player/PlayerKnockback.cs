@@ -73,9 +73,9 @@ public class PlayerKnockback : MonoBehaviour
                     }
                     else
                     {
-                        recoverDir = GetComponent<PlayerMovement>().GetMovementInput();
+                        recoverDir = GetComponent<PlayerMovement>().GetMovementInput().normalized;
                         knockbackState = KnockbackState.Recover;
-                        recoverTimer = recoverDir == Vector3.zero ? recoverTime/2 : 0;
+                        recoverTimer = recoverDir == Vector3.zero ? recoverTime / 2 : 0;
                     }
                 }
             }

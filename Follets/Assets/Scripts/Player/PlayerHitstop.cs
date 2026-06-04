@@ -8,14 +8,15 @@ public class PlayerHitstop : MonoBehaviour
 
     bool hitstopped;
     bool damaged;
+    public bool Damaged => damaged;
 
     Vector3 originalPos;
     float maxShakeDist = 0.35f;
     float minShakeDist = 0.1f;
 
     float hitstopTimer;
-    float bigHitstopTime = 1; //0.25f;
-    float smallHitstopTime = 0.5f; //0.1f;
+    public float bigHitstopTime = 1; //0.25f;
+    public float smallHitstopTime = 0.5f; //0.1f;
 
     PlayerState prevState;
     Vector3 prevSpeed;
@@ -31,7 +32,7 @@ public class PlayerHitstop : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void FixedUpdate()
@@ -68,10 +69,10 @@ public class PlayerHitstop : MonoBehaviour
     public void StartVictimHitstop(bool bigHit)
     {
         playerManager.MyState = PlayerState.Hitstopping;
-        
+
         originalPos = transform.position;
         damaged = true;
-        
+
         hitstopped = true;
         hitstopTimer = bigHit ? bigHitstopTime : smallHitstopTime;
     }
