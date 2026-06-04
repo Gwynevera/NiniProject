@@ -230,16 +230,6 @@ public class PlayerAttack : MonoBehaviour
                         {
                             hitboxActive = true;
 
-                            /*attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
-                            if (attackDirection == Vector3.zero)
-                            {
-                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = transform.forward;
-                            }
-                            else
-                            {
-                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = Vector3.Lerp(GetComponent<PlayerMovement>().DesiredForward, attackDirection, attackRotate);
-                            }*/
-
                             rb.linearVelocity = Vector3.zero;
                             rb.AddForce(attackDirection * attackMoveSpeed, ForceMode.VelocityChange);
                         }
@@ -328,6 +318,11 @@ public class PlayerAttack : MonoBehaviour
 
                             GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
                         }
+                    }
+                    
+                    if (obj.name == "Parry")
+                    {
+
                     }
                 }
             }
