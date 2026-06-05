@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
     float lerpSpeed = 15f;
     float fastLerpSpeed = 20f;
 
-    float minStickMovement = 0.1f;
+    float minStickMovement = 0.15f;
 
     Vector3 movementInput;
 

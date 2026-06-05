@@ -95,7 +95,7 @@ public class PlayerManager : MonoBehaviour
         else
         {
             // Drop current
-            myWeapon.GetComponent<WeaponObject>().DropWeapon(myWeapon.transform);
+            myWeapon.GetComponent<WeaponObject>().DropWeapon(myWeapon.transform, Vector3.zero);
             OnDropWeapon?.Invoke();
         }
 
@@ -142,7 +142,7 @@ public class PlayerManager : MonoBehaviour
                 if (myWeapon == null
                     || myState == PlayerState.Attacking
                     || myState == PlayerState.Parrying
-                    || myState == PlayerState.Throwing
+                    //|| myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)

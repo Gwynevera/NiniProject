@@ -27,9 +27,9 @@ public class WeaponObject : MonoBehaviour
     float minVel = 0.25f;
 
     bool dropping;
-    float timeToDrop = 0.5f;
+    float timeToDrop = 0.55f;
     float dropTimer;
-    float dropForce = 8f;
+    float dropForce = 14f;
     Vector3 dropDir;
 
     bool timestopped;
@@ -90,6 +90,7 @@ public class WeaponObject : MonoBehaviour
         }
         else if (dropping)
         {
+
             dropTimer += Time.fixedDeltaTime;
             if (dropTimer > timeToDrop)
             {
@@ -142,7 +143,7 @@ public class WeaponObject : MonoBehaviour
         throwTimer = 0;
     }
 
-    public void DropWeapon(Transform t)
+    public void DropWeapon(Transform t, Vector3 sugestDir)
     {
         gameObject.SetActive(true);
 
@@ -158,10 +159,21 @@ public class WeaponObject : MonoBehaviour
         dropping = true;
         dropTimer = 0;
 
-        float dropX = Random.Range(-1, 1);
-        float dropZ = Random.Range(-1, 1);
-        dropDir = new Vector3(dropX, 0, dropZ);
+        if (sugestDir == Vector3.zero)
+        {
+            float dropX = Random.Range(-1, 1);
+            float dropZ = Random.Range(-1, 1);
+            dropDir = new Vector3(dropX, 0, dropZ);
+        }
+        else
+        {
+            dropDir = sugestDir;
+        }
+
+        rb.linearVelocity = Vector3.zero;
         rb.AddForce(dropDir.normalized * dropForce, ForceMode.VelocityChange);
+
+        rb.angularVelocity = Vector3.zero;
         rb.AddTorque(new Vector3(0, dropForce, 0), ForceMode.Impulse);
     }
 
@@ -201,7 +213,9 @@ public class WeaponObject : MonoBehaviour
     {
         if (c.name == "Parry")
         {
-            c.GetComponentInParent<PlayerParry>().ParrySuccessful(c.transform.position - transform.position, weapon.weight > 1.5f ? 2 : 1);
+            Vector3 knockDir = c.transform.position - transform.position;
+            c.GetComponentInParent<PlayerParry>().ParrySuccessful(knockDir, weapon.weight > 1.5f ? 2 : 1);
+            DropWeapon(transform, -knockDir);
         }
     }
 }

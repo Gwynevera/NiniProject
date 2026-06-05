@@ -38,7 +38,8 @@ public class PlayerAttack : MonoBehaviour
     float attackMoveSpeedMult = 0.75f;
 
     float attackFriction = 0.65f;
-    float attackRotate = 0.5f;
+    /// float attackRotate = 0.5f;
+    
     public float AttackMoveSpeed => attackMoveSpeed;
 
     bool hitboxActive;
@@ -324,6 +325,10 @@ public class PlayerAttack : MonoBehaviour
                     {
                         obj.GetComponentInParent<PlayerParry>().ParrySuccessful(obj.transform.position - transform.position, charged ? 2 : 1);
                         parried = true;
+
+                        obj.GetComponentInParent<PlayerHitstop>().StartBullyHitstop(obj.GetComponentInParent<PlayerManager>().MyState, obj.GetComponentInParent<Rigidbody>().linearVelocity, knockType == KnockbackType.Big);
+                        GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
+                        
                         return;
                     }
 

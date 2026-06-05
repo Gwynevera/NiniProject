@@ -12,10 +12,10 @@ public class PlayerParry : MonoBehaviour
 
     float parryTime = 0.5f;
     float porryTime = 1f;
-    float perryTime = 1.5f;
+    float perryTime = 0.45f;
     float parryTimer;
 
-    float parryKnockback = 15f;
+    float parryKnockback = 5f;
 
     float parryFriction = 0.7755f;
     float perryFriction = 0.957f;
@@ -127,7 +127,7 @@ public class PlayerParry : MonoBehaviour
         return false;
     }
 
-    public void ParrySuccessful(Vector3 dir, float multiplier)
+    public void ParrySuccessful(Vector3 dir, float mult)
     {
         parry.SetActive(false);
 
@@ -137,7 +137,7 @@ public class PlayerParry : MonoBehaviour
         perrying = true;
 
         rb.linearVelocity = Vector3.zero;
-        rb.AddForce(dir.normalized * parryKnockback, ForceMode.VelocityChange);
+        rb.AddForce(dir.normalized * parryKnockback * mult, ForceMode.VelocityChange);
 
         GetComponent<PlayerMovement>().DesiredForward = -dir;
     }
