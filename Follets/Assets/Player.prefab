@@ -61,6 +61,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5b60d04d55bad848b5a404e6be27f85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
+  myState: 0
   health: 3
   width: 1
   myWeapon: {fileID: 0}

@@ -8,14 +8,17 @@ public class PlayerParry : MonoBehaviour
 
     bool parrying;
     bool porrying;
+    bool perrying;
 
-    float parryParryTime = 0.25f;
-    float parryPorryTime = 0.55f;
+    float parryTime = 0.5f;
+    float porryTime = 1f;
+    float perryTime = 1.5f;
     float parryTimer;
 
-    float parryKnockback = 5f;
+    float parryKnockback = 15f;
 
     float parryFriction = 0.7755f;
+    float perryFriction = 0.957f;
 
     public GameObject parry;
 
@@ -23,20 +26,33 @@ public class PlayerParry : MonoBehaviour
     {
         playerManager = GetComponent<PlayerManager>();
         rb = GetComponent<Rigidbody>();
+
+        playerManager.OnResetParry += ResetParry;
+    }
+
+    private void OnDestroy()
+    {
+        if (playerManager != null)
+        {
+            playerManager.OnResetParry -= ResetParry;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (GetParryInput() && playerManager.CanDoAction(PlayerAction.Parry))
+        if (GetParryInput() && (playerManager.MyState != PlayerState.Parrying || perrying))
         {
             playerManager.MyState = PlayerState.Parrying;
 
-            parrying = true;
             parryTimer = 0;
+            parrying = true;
             porrying = false;
+            perrying = false;
 
             parry.SetActive(true);
+
+            GetComponent<PlayerMovement>().DesiredForward = GetComponent<PlayerMovement>().GetMovementInput().normalized;
         }
     }
 
@@ -46,33 +62,45 @@ public class PlayerParry : MonoBehaviour
         {
             if (rb.linearVelocity != Vector3.zero)
             {
-                rb.linearVelocity *= parryFriction;
+                rb.linearVelocity *= perrying ? perryFriction : parryFriction;
             }
 
+            // Parry is ACTIVE
             if (parrying)
             {
                 parryTimer += Time.fixedDeltaTime;
 
-                if (parryTimer >= parryParryTime)
+                if (parryTimer >= parryTime)
                 {
+                    parryTimer = playerManager.myWeapon == null ? parryTime/2 : 0;
                     parrying = false;
-                    parryTimer = 0;
                     porrying = true;
+                    perrying = false;
 
                     parry.SetActive(false);
                 }
             }
 
+            // Parry is DISABLED
             if (porrying)
             {
                 parryTimer += Time.fixedDeltaTime;
 
-                if (parryTimer >= parryPorryTime)
+                if (parryTimer >= porryTime)
                 {
-                    parrying = false;
-                    parryTimer = 0;
-                    porrying = false;
+                    ResetParry();
+                    playerManager.MyState = PlayerState.Idle;
+                }
+            }
 
+            // Parry was SUCCESSFUL
+            if (perrying)
+            {
+                parryTimer += Time.fixedDeltaTime;
+
+                if (parryTimer >= perryTime)
+                {
+                    ResetParry();
                     playerManager.MyState = PlayerState.Idle;
                 }
             }
@@ -97,5 +125,29 @@ public class PlayerParry : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void ParrySuccessful(Vector3 dir, float multiplier)
+    {
+        parry.SetActive(false);
+
+        parryTimer = 0;
+        parrying = false;
+        porrying = false;
+        perrying = true;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.AddForce(dir.normalized * parryKnockback, ForceMode.VelocityChange);
+
+        GetComponent<PlayerMovement>().DesiredForward = -dir;
+    }
+
+    void ResetParry()
+    {
+        parry.SetActive(false);
+        parrying = false;
+        porrying = false;
+        perrying = false;
+        parryTimer = 0;
     }
 }

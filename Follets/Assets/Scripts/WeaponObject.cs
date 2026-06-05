@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -194,5 +195,13 @@ public class WeaponObject : MonoBehaviour
         prevTorque = rb.angularVelocity;
 
         rb.linearVelocity = rb.angularVelocity = Vector3.zero;
+    }
+
+    private void OnTriggerEnter(Collider c)
+    {
+        if (c.name == "Parry")
+        {
+            c.GetComponentInParent<PlayerParry>().ParrySuccessful(c.transform.position - transform.position, weapon.weight > 1.5f ? 2 : 1);
+        }
     }
 }

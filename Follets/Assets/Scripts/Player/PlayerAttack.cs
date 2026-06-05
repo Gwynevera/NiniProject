@@ -82,6 +82,15 @@ public class PlayerAttack : MonoBehaviour
     bool tooMuchHold;
     float holdTimer;
 
+    bool parried;
+    public bool Parried
+    {
+        set
+        {
+            parried = value;
+        }
+    }
+
     void Awake()
     {
         playerManager = GetComponent<PlayerManager>();
@@ -125,6 +134,7 @@ public class PlayerAttack : MonoBehaviour
 
                     attackTimer = 0;
                     buffered = false;
+                    parried = false;
 
                     attackDirection = GetComponent<PlayerMovement>().GetMovementInput().normalized;
                     if (attackDirection == Vector3.zero)
@@ -296,6 +306,8 @@ public class PlayerAttack : MonoBehaviour
 
     void HitboxCheck(KnockbackType knockType, float boxOffset, Vector3 boxSize)
     {
+        if (parried) return;
+
         Vector3 boxCenter = transform.position + (boxOffset * attackDirection);
         Collider[] objects = Physics.OverlapBox(boxCenter, boxSize, transform.rotation);
 
@@ -308,10 +320,18 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (obj.gameObject != this.gameObject)
                 {
+                    if (obj.name == "Parry")
+                    {
+                        obj.GetComponentInParent<PlayerParry>().ParrySuccessful(obj.transform.position - transform.position, charged ? 2 : 1);
+                        parried = true;
+                        return;
+                    }
+
                     if (obj.tag == "Player")
                     {
                         if (obj.GetComponent<PlayerManager>().CanDoAction(PlayerAction.Knockback)
-                            && !obj.GetComponent<PlayerRoll>().invencible)
+                            && !obj.GetComponent<PlayerRoll>().invencible
+                            && !obj.GetComponent<PlayerParry>().parry.activeSelf)
                         {
                             Vector3 dir = obj.transform.position - transform.position;
                             obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType, playerManager.myWeapon != null);
@@ -320,10 +340,6 @@ public class PlayerAttack : MonoBehaviour
                         }
                     }
                     
-                    if (obj.name == "Parry")
-                    {
-
-                    }
                 }
             }
         }
@@ -402,5 +418,7 @@ public class PlayerAttack : MonoBehaviour
         chargeTimer = 0;
         bufferTimer = 0;
         holdTimer = 0;
+
+        parried = false;
     }
 }
