@@ -77,7 +77,7 @@ public class PlayerHitstop : MonoBehaviour
         hitstopTimer = bigHit ? bigHitstopTime : smallHitstopTime;
     }
 
-    public void StartBullyHitstop(PlayerState preState, Vector3 preSpeed, bool bigHit)
+    public void StartBullyHitstop(PlayerState preState, Vector3 preSpeed, bool bigHit, bool parried = false)
     {
         playerManager.MyState = PlayerState.Hitstopping;
 
@@ -92,6 +92,8 @@ public class PlayerHitstop : MonoBehaviour
             float speed = pAttack.Charged ? pAttack.ChargeMoveSpeed : pAttack.AttackMoveSpeed;
             prevSpeed = transform.forward * speed;
         }
+
+        if (parried) prevSpeed /= 2;
 
         hitstopped = true;
         hitstopTimer = bigHit ? bigHitstopTime : smallHitstopTime;

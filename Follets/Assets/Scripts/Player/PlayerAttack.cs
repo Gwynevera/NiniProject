@@ -333,7 +333,7 @@ public class PlayerAttack : MonoBehaviour
                         }
 
                         parried = true;
-                        GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
+                        GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big, true);
                         
                         return;
                     }
