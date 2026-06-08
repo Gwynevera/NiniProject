@@ -310,7 +310,7 @@ public class PlayerAttack : MonoBehaviour
         if (parried) return;
 
         Vector3 boxCenter = transform.position + (boxOffset * attackDirection);
-        Collider[] objects = Physics.OverlapBox(boxCenter, boxSize, transform.rotation);
+        Collider[] objects = Physics.OverlapBox(boxCenter, boxSize/2, transform.rotation);
 
         // Dibujar la caja del OverlapBox
         Utils.DrawOverlapBox(boxCenter, boxSize, transform.rotation, knockType == KnockbackType.Big ? Color.red : Color.blue);
@@ -323,10 +323,16 @@ public class PlayerAttack : MonoBehaviour
                 {
                     if (obj.name == "Parry")
                     {
-                        obj.GetComponentInParent<PlayerParry>().ParrySuccessful(obj.transform.position - transform.position, charged ? 2 : 1);
-                        parried = true;
+                        if (obj.transform.parent != null)
+                        {
+                            Vector3 parryDir = obj.transform.position - transform.position;
+                            parryDir.y = 0;
+                            obj.GetComponentInParent<PlayerParry>().ParrySuccessful(parryDir.normalized, charged ? 2 : 1);
+                            
+                            obj.GetComponentInParent<PlayerHitstop>().StartBullyHitstop(obj.GetComponentInParent<PlayerManager>().MyState, obj.GetComponentInParent<Rigidbody>().linearVelocity, knockType == KnockbackType.Big);
+                        }
 
-                        obj.GetComponentInParent<PlayerHitstop>().StartBullyHitstop(obj.GetComponentInParent<PlayerManager>().MyState, obj.GetComponentInParent<Rigidbody>().linearVelocity, knockType == KnockbackType.Big);
+                        parried = true;
                         GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
                         
                         return;

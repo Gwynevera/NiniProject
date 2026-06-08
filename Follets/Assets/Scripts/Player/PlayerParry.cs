@@ -12,15 +12,17 @@ public class PlayerParry : MonoBehaviour
 
     float parryTime = 0.5f;
     float porryTime = 1f;
-    float perryTime = 0.45f;
+    float perryTime = 0.4f;
     float parryTimer;
 
-    float parryKnockback = 5f;
+    float parryKnockback = 17.5f;
 
     float parryFriction = 0.7755f;
-    float perryFriction = 0.957f;
+    float perryFriction = 0.825f;
 
     public GameObject parry;
+
+    Vector3 savedForce;
 
     void Awake()
     {
@@ -96,6 +98,11 @@ public class PlayerParry : MonoBehaviour
             // Parry was SUCCESSFUL
             if (perrying)
             {
+                if (parryTimer == 0)
+                {
+                    rb.AddForce(savedForce, ForceMode.VelocityChange);
+                }
+
                 parryTimer += Time.fixedDeltaTime;
 
                 if (parryTimer >= perryTime)
@@ -137,7 +144,7 @@ public class PlayerParry : MonoBehaviour
         perrying = true;
 
         rb.linearVelocity = Vector3.zero;
-        rb.AddForce(dir.normalized * parryKnockback * mult, ForceMode.VelocityChange);
+        savedForce = dir.normalized * parryKnockback * mult;
 
         GetComponent<PlayerMovement>().DesiredForward = -dir;
     }

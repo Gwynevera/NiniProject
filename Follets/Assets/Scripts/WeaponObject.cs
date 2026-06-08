@@ -211,7 +211,7 @@ public class WeaponObject : MonoBehaviour
 
     private void OnTriggerEnter(Collider c)
     {
-        if (c.name == "Parry")
+        if (c.name == "Parry" && rb.constraints == RigidbodyConstraints.FreezeAll)
         {
             Vector3 knockDir = c.transform.position - transform.position;
             c.GetComponentInParent<PlayerParry>().ParrySuccessful(knockDir, weapon.weight > 1.5f ? 2 : 1);
