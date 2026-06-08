@@ -38,7 +38,8 @@ public class PlayerAttack : MonoBehaviour
     float attackMoveSpeedMult = 0.75f;
 
     float attackFriction = 0.65f;
-    float attackRotate = 0.5f;
+    /// float attackRotate = 0.5f;
+    
     public float AttackMoveSpeed => attackMoveSpeed;
 
     bool hitboxActive;
@@ -81,6 +82,15 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     bool tooMuchHold;
     float holdTimer;
+
+    bool parried;
+    public bool Parried
+    {
+        set
+        {
+            parried = value;
+        }
+    }
 
     void Awake()
     {
@@ -125,6 +135,7 @@ public class PlayerAttack : MonoBehaviour
 
                     attackTimer = 0;
                     buffered = false;
+                    parried = false;
 
                     attackDirection = GetComponent<PlayerMovement>().GetMovementInput().normalized;
                     if (attackDirection == Vector3.zero)
@@ -230,16 +241,6 @@ public class PlayerAttack : MonoBehaviour
                         {
                             hitboxActive = true;
 
-                            /*attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
-                            if (attackDirection == Vector3.zero)
-                            {
-                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = transform.forward;
-                            }
-                            else
-                            {
-                                attackDirection = GetComponent<PlayerMovement>().DesiredForward = Vector3.Lerp(GetComponent<PlayerMovement>().DesiredForward, attackDirection, attackRotate);
-                            }*/
-
                             rb.linearVelocity = Vector3.zero;
                             rb.AddForce(attackDirection * attackMoveSpeed, ForceMode.VelocityChange);
                         }
@@ -306,6 +307,8 @@ public class PlayerAttack : MonoBehaviour
 
     void HitboxCheck(KnockbackType knockType, float boxOffset, Vector3 boxSize)
     {
+        if (parried) return;
+
         Vector3 boxCenter = transform.position + (boxOffset * attackDirection);
         Collider[] objects = Physics.OverlapBox(boxCenter, boxSize, transform.rotation);
 
@@ -318,10 +321,22 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (obj.gameObject != this.gameObject)
                 {
+                    if (obj.name == "Parry")
+                    {
+                        obj.GetComponentInParent<PlayerParry>().ParrySuccessful(obj.transform.position - transform.position, charged ? 2 : 1);
+                        parried = true;
+
+                        obj.GetComponentInParent<PlayerHitstop>().StartBullyHitstop(obj.GetComponentInParent<PlayerManager>().MyState, obj.GetComponentInParent<Rigidbody>().linearVelocity, knockType == KnockbackType.Big);
+                        GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
+                        
+                        return;
+                    }
+
                     if (obj.tag == "Player")
                     {
                         if (obj.GetComponent<PlayerManager>().CanDoAction(PlayerAction.Knockback)
-                            && !obj.GetComponent<PlayerRoll>().invencible)
+                            && !obj.GetComponent<PlayerRoll>().invencible
+                            && !obj.GetComponent<PlayerParry>().parry.activeSelf)
                         {
                             Vector3 dir = obj.transform.position - transform.position;
                             obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType, playerManager.myWeapon != null);
@@ -329,6 +344,7 @@ public class PlayerAttack : MonoBehaviour
                             GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
                         }
                     }
+                    
                 }
             }
         }
@@ -407,5 +423,7 @@ public class PlayerAttack : MonoBehaviour
         chargeTimer = 0;
         bufferTimer = 0;
         holdTimer = 0;
+
+        parried = false;
     }
 }

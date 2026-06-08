@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
     float lerpSpeed = 15f;
     float fastLerpSpeed = 20f;
 
-    float minStickMovement = 0.1f;
+    float minStickMovement = 0.15f;
 
     Vector3 movementInput;
 
@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (playerManager.CanDoAction(PlayerAction.Move))
         {
-            movementInput = GetMovementInput().normalized;
+            movementInput = GetMovementInput();
         }
     }
 
@@ -68,7 +68,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (playerManager.MyState == PlayerState.Attacking
             || playerManager.MyState == PlayerState.Rolling
-            || playerManager.MyState == PlayerState.Throwing)
+            || playerManager.MyState == PlayerState.Throwing
+            || playerManager.MyState == PlayerState.Parrying)
         {
             transform.forward = Vector3.Lerp(transform.forward, desiredForward, fastLerpSpeed * Time.fixedDeltaTime);
         }

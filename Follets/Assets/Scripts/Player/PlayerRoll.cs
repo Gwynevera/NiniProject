@@ -69,14 +69,11 @@ public class PlayerRoll : MonoBehaviour
         playerManager.MyState = PlayerState.Rolling;
 
         rollDir = GetComponent<PlayerMovement>().GetMovementInput().normalized;
-        if (rollDir != Vector3.zero)
+        if (rollDir == Vector3.zero)
         {
-            GetComponent<PlayerMovement>().DesiredForward = rollDir;
+            rollDir = transform.forward.normalized;
         }
-        else
-        {
-            rollDir = transform.forward;
-        }
+        GetComponent<PlayerMovement>().DesiredForward = rollDir;
 
         rb.linearVelocity = Vector3.zero;
         rb.AddForce(rollDir * rollSpeed, ForceMode.VelocityChange);

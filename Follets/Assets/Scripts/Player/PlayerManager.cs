@@ -8,6 +8,7 @@ public enum PlayerState
     Attacking,
     Charging,
     Throwing,
+    Parrying,
     Rolling,
     Hitstopping,
     Knockbacking,
@@ -19,6 +20,7 @@ public enum PlayerAction
     Attack,
     Charge,
     Throw,
+    Parry,
     Roll,
     Hitstop,
     Knockback,
@@ -27,6 +29,7 @@ public enum PlayerAction
 
 public class PlayerManager : MonoBehaviour
 {
+    [SerializeField]
     private PlayerState myState;
     public PlayerState MyState
     {
@@ -42,17 +45,20 @@ public class PlayerManager : MonoBehaviour
                     case PlayerState.Throwing:
                         OnResetAttack?.Invoke();
                         break;
+
                     case PlayerState.Rolling:
                         OnResetAttack?.Invoke();
                         OnResetThrow?.Invoke();
                         break;
-                    case PlayerState.Knockbacking:
+
                     case PlayerState.Hitstopping:
+                    case PlayerState.Knockbacking:
                         if (GetComponent<PlayerHitstop>().Damaged)
                         {
                             OnResetAttack?.Invoke();
                             OnResetThrow?.Invoke();
                             OnResetRoll?.Invoke();
+                            OnResetParry?.Invoke();
                         }
                         break;
                 }
@@ -63,6 +69,7 @@ public class PlayerManager : MonoBehaviour
     public event Action OnResetAttack;
     public event Action OnResetRoll;
     public event Action OnResetThrow;
+    public event Action OnResetParry;
     public event Action OnGetWeapon;
     public event Action OnDropWeapon;
 
@@ -88,7 +95,7 @@ public class PlayerManager : MonoBehaviour
         else
         {
             // Drop current
-            myWeapon.GetComponent<WeaponObject>().DropWeapon(myWeapon.transform);
+            myWeapon.GetComponent<WeaponObject>().DropWeapon(myWeapon.transform, Vector3.zero);
             OnDropWeapon?.Invoke();
         }
 
@@ -102,6 +109,7 @@ public class PlayerManager : MonoBehaviour
         {
             case PlayerAction.Move:
                 if (myState == PlayerState.Attacking
+                    || myState == PlayerState.Parrying
                     || GetComponent<PlayerThrow>().Thrown
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
@@ -111,6 +119,7 @@ public class PlayerManager : MonoBehaviour
 
             case PlayerAction.Attack:
                 if (myState == PlayerState.Attacking
+                    || myState == PlayerState.Parrying
                     || myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
@@ -121,6 +130,7 @@ public class PlayerManager : MonoBehaviour
             case PlayerAction.Charge:
                 if (myWeapon == null
                     || myState == PlayerState.Attacking
+                    || myState == PlayerState.Parrying
                     || myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
@@ -131,6 +141,18 @@ public class PlayerManager : MonoBehaviour
             case PlayerAction.Throw:
                 if (myWeapon == null
                     || myState == PlayerState.Attacking
+                    || myState == PlayerState.Parrying
+                    //|| myState == PlayerState.Throwing
+                    || myState == PlayerState.Rolling
+                    || myState == PlayerState.Hitstopping
+                    || myState == PlayerState.Knockbacking)
+                    return false;
+                return true;
+
+            case PlayerAction.Parry:
+                if (myState == PlayerState.Attacking
+                    || myState == PlayerState.Parrying
+                    || myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)
@@ -139,6 +161,7 @@ public class PlayerManager : MonoBehaviour
 
             case PlayerAction.Roll:
                 if (myState == PlayerState.Attacking
+                    || myState == PlayerState.Parrying
                     || GetComponent<PlayerThrow>().Thrown
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
@@ -160,6 +183,8 @@ public class PlayerManager : MonoBehaviour
 
             case PlayerAction.None:
                 if (myState == PlayerState.Attacking
+                    || myState == PlayerState.Parrying
+                    || myState == PlayerState.Throwing
                     || myState == PlayerState.Rolling
                     || myState == PlayerState.Hitstopping
                     || myState == PlayerState.Knockbacking)

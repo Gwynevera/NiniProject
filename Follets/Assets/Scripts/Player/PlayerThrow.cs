@@ -58,14 +58,11 @@ public class PlayerThrow : MonoBehaviour
                 throwTimer = 0;
 
                 throwDir = GetComponent<PlayerMovement>().GetMovementInput().normalized;
-                if (throwDir != Vector3.zero)
+                if (throwDir == Vector3.zero)
                 {
-                    GetComponent<PlayerMovement>().DesiredForward = throwDir;
+                    throwDir = transform.forward.normalized;
                 }
-                else
-                {
-                    throwDir = transform.forward;
-                }
+                GetComponent<PlayerMovement>().DesiredForward = throwDir;
 
                 rb.linearVelocity = Vector3.zero;
                 rb.AddForce(throwDir * throwSpeed, ForceMode.VelocityChange);

@@ -96,4 +96,9 @@ public class PlayerHitstop : MonoBehaviour
         hitstopped = true;
         hitstopTimer = bigHit ? bigHitstopTime : smallHitstopTime;
     }
+
+    void AbortHitstop()
+    {
+
+    }
 }
