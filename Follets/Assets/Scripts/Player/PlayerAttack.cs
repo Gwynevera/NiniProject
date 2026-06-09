@@ -137,17 +137,17 @@ public class PlayerAttack : MonoBehaviour
                     buffered = false;
                     parried = false;
 
-                    attackDirection = GetComponent<PlayerMovement>().GetMovementInput().normalized;
+                    attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
                     if (attackDirection == Vector3.zero)
                     {
-                        attackDirection = transform.forward.normalized;
+                        attackDirection = transform.forward;
                     }
                     GetComponent<PlayerMovement>().DesiredForward = attackDirection;
 
                     if (charged)
                     {
                         rb.linearVelocity = Vector3.zero;
-                        rb.AddForce(attackDirection * chargeMoveSpeed, ForceMode.VelocityChange);
+                        rb.AddForce(attackDirection.normalized * chargeMoveSpeed, ForceMode.VelocityChange);
                     }
                 }
                 else if (attackTimer >= attackPrepareTime + (attackActiveTime/2))
@@ -329,11 +329,11 @@ public class PlayerAttack : MonoBehaviour
                             parryDir.y = 0;
                             obj.GetComponentInParent<PlayerParry>().ParrySuccessful(parryDir.normalized, charged ? 2 : 1);
                             
-                            obj.GetComponentInParent<PlayerHitstop>().StartBullyHitstop(obj.GetComponentInParent<PlayerManager>().MyState, obj.GetComponentInParent<Rigidbody>().linearVelocity, knockType == KnockbackType.Big);
+                            obj.GetComponentInParent<PlayerHitstop>().StartBullyHitstop(obj.GetComponentInParent<PlayerManager>().MyState, obj.GetComponentInParent<Rigidbody>().linearVelocity, PlayerHitstop.smallHitstopTime);
                         }
 
                         parried = true;
-                        GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big, true);
+                        GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, PlayerHitstop.smallHitstopTime, true);
                         
                         return;
                     }
@@ -344,10 +344,12 @@ public class PlayerAttack : MonoBehaviour
                             && !obj.GetComponent<PlayerRoll>().invencible
                             && !obj.GetComponent<PlayerParry>().parry.activeSelf)
                         {
-                            Vector3 dir = obj.transform.position - transform.position;
-                            obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType, playerManager.myWeapon != null);
+                            float hitTime = charged ? PlayerHitstop.bigHitstopTime : PlayerHitstop.smallHitstopTime;
 
-                            GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, knockType == KnockbackType.Big);
+                            Vector3 dir = obj.transform.position - transform.position;
+                            obj.GetComponent<PlayerKnockback>().SetKnockbackDamage(dir.normalized, knockType, hitTime);
+
+                            GetComponent<PlayerHitstop>().StartBullyHitstop(playerManager.MyState, rb.linearVelocity, hitTime);
                         }
                     }
                     

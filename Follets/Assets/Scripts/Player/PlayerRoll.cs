@@ -7,8 +7,8 @@ public class PlayerRoll : MonoBehaviour
     PlayerManager playerManager;
     Rigidbody rb;
 
-    float rollSpeed = 20f;
-    float rollFriction = 0.875f;
+    float rollSpeed = 12.5f;
+    float rollFriction = 0.75f;
     Vector3 rollDir;
 
     float rollDuration = 0.5f;

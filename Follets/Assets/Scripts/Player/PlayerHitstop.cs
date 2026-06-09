@@ -11,12 +11,12 @@ public class PlayerHitstop : MonoBehaviour
     public bool Damaged => damaged;
 
     Vector3 originalPos;
-    float maxShakeDist = 0.35f;
-    float minShakeDist = 0.1f;
+    float maxShakeDist = 0.155f;
+    float minShakeDist = 0.075f;
 
     float hitstopTimer;
-    public float bigHitstopTime = 1; //0.25f;
-    public float smallHitstopTime = 0.5f; //0.1f;
+    public static float bigHitstopTime = 0.125f;
+    public static float smallHitstopTime = 0.0765f;
 
     PlayerState prevState;
     Vector3 prevSpeed;
@@ -66,7 +66,7 @@ public class PlayerHitstop : MonoBehaviour
         }
     }
 
-    public void StartVictimHitstop(bool bigHit)
+    public void StartVictimHitstop(float hitTime)
     {
         playerManager.MyState = PlayerState.Hitstopping;
 
@@ -74,10 +74,10 @@ public class PlayerHitstop : MonoBehaviour
         damaged = true;
 
         hitstopped = true;
-        hitstopTimer = bigHit ? bigHitstopTime : smallHitstopTime;
+        hitstopTimer = hitTime;
     }
 
-    public void StartBullyHitstop(PlayerState preState, Vector3 preSpeed, bool bigHit, bool parried = false)
+    public void StartBullyHitstop(PlayerState preState, Vector3 preSpeed, float hitTime, bool parried = false)
     {
         playerManager.MyState = PlayerState.Hitstopping;
 
@@ -96,7 +96,7 @@ public class PlayerHitstop : MonoBehaviour
         if (parried) prevSpeed /= 2;
 
         hitstopped = true;
-        hitstopTimer = bigHit ? bigHitstopTime : smallHitstopTime;
+        hitstopTimer = hitTime;
     }
 
     void AbortHitstop()

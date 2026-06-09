@@ -22,16 +22,20 @@ public class PlayerCollision : MonoBehaviour
         {
             bool yes = false;
 
+            float t = 0;
+
             if (c.collider.CompareTag("Attack"))
             {
                 yes = true;
+                t = PlayerHitstop.bigHitstopTime;
             }
             else if (c.collider.CompareTag("Weapon"))
             {
                 if (c.collider.gameObject.GetComponent<WeaponObject>().player != this.gameObject)
                 {
-                    c.collider.gameObject.GetComponent<WeaponObject>().SetTimestop(GetComponent<PlayerHitstop>().smallHitstopTime);
                     yes = true;
+                    t = PlayerHitstop.smallHitstopTime;
+                    c.collider.gameObject.GetComponent<WeaponObject>().SetTimestop(t);
                 }
                 else
                 {
@@ -44,7 +48,7 @@ public class PlayerCollision : MonoBehaviour
                 Vector3 knockDir = transform.position - c.transform.position;
                 knockDir.y = 0;
 
-                SetupKnockback(knockDir, KnockbackType.Small);
+                SetupKnockback(knockDir, KnockbackType.Small, t);
             }
         }
     }
@@ -83,13 +87,13 @@ public class PlayerCollision : MonoBehaviour
         }
     }
 
-    void SetupKnockback(Vector3 d, KnockbackType k)
+    void SetupKnockback(Vector3 d, KnockbackType k, float t)
     {
         if (playerManager.CanDoAction(PlayerAction.Knockback)
             && !GetComponent<PlayerRoll>().invencible)
         {
             transform.forward = -d.normalized;
-            GetComponent<PlayerKnockback>().SetKnockbackDamage(d, k);
+            GetComponent<PlayerKnockback>().SetKnockbackDamage(d, k, t);
         }
     }
 }

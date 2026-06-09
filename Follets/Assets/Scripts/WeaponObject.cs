@@ -29,7 +29,8 @@ public class WeaponObject : MonoBehaviour
     bool dropping;
     float timeToDrop = 0.55f;
     float dropTimer;
-    float dropForce = 14f;
+    float dropForce = 5f;
+    float dropFriction = 0.85f;
     Vector3 dropDir;
 
     bool timestopped;
@@ -37,6 +38,8 @@ public class WeaponObject : MonoBehaviour
 
     Vector3 prevSpeed;
     Vector3 prevTorque;
+
+    float weightThreshold = 1.5f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -90,8 +93,11 @@ public class WeaponObject : MonoBehaviour
         }
         else if (dropping)
         {
-
             dropTimer += Time.fixedDeltaTime;
+
+            rb.linearVelocity *= dropFriction;
+            rb.angularVelocity *= dropFriction;
+
             if (dropTimer > timeToDrop)
             {
                 rb.linearVelocity = Vector3.zero;
@@ -196,6 +202,8 @@ public class WeaponObject : MonoBehaviour
 
         timestopped = false;
         timestopTimer = 0;
+
+        player = null;
     }
 
     public void SetTimestop(float t)
@@ -211,11 +219,21 @@ public class WeaponObject : MonoBehaviour
 
     private void OnTriggerEnter(Collider c)
     {
-        if (c.name == "Parry" && rb.constraints == RigidbodyConstraints.FreezeAll)
+        if (c.name == "Parry" && rb.constraints != RigidbodyConstraints.FreezeAll)
         {
             Vector3 knockDir = c.transform.position - transform.position;
-            c.GetComponentInParent<PlayerParry>().ParrySuccessful(knockDir, weapon.weight > 1.5f ? 2 : 1);
-            DropWeapon(transform, -knockDir);
+            c.GetComponentInParent<PlayerParry>().ParrySuccessful(knockDir, weapon.weight > weightThreshold ? 2 : 1);
+
+            if (c.GetComponentInParent<PlayerManager>().myWeapon == null)
+            {
+                ResetWeapon();
+
+                c.GetComponentInParent<PlayerCollision>().HandleWeapon(this.gameObject);
+            }
+            else
+            {
+                DropWeapon(transform, -knockDir);
+            }
         }
     }
 }

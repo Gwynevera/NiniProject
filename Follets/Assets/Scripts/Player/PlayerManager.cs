@@ -66,6 +66,8 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    PlayerKnockback playerKnockback;
+
     public event Action OnResetAttack;
     public event Action OnResetRoll;
     public event Action OnResetThrow;
@@ -83,7 +85,16 @@ public class PlayerManager : MonoBehaviour
 
     private void Awake()
     {
+        playerKnockback = GetComponent<PlayerKnockback>();
 
+        playerKnockback.OnDamaged += PlayerDamaged;
+        playerKnockback.OnDied += PlayerDied;
+    }
+
+    private void OnDestroy()
+    {
+        playerKnockback.OnDamaged -= PlayerDamaged;
+        playerKnockback.OnDied -= PlayerDied;
     }
 
     public void GetWeapon(GameObject weapon)
@@ -194,5 +205,15 @@ public class PlayerManager : MonoBehaviour
             default:
                 return false;
         }
+    }
+
+    private void PlayerDamaged()
+    {
+
+    }
+
+    private void PlayerDied()
+    {
+
     }
 }

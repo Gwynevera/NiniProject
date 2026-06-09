@@ -19,7 +19,11 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 DesiredForward
     {
         get { return desiredForward; }
-        set { desiredForward = value; }
+        set 
+        { 
+            desiredForward = value;
+            Debug.Log("Set " + DesiredForward);
+        }
     }
 
 

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public enum KnockbackType
 {
@@ -16,6 +17,9 @@ public class PlayerKnockback : MonoBehaviour
 {
     PlayerManager playerManager;
     Rigidbody rb;
+
+    public event Action OnDamaged;
+    public event Action OnDied;
 
     KnockbackType knockbackType;
     KnockbackState knockbackState;
@@ -101,7 +105,7 @@ public class PlayerKnockback : MonoBehaviour
         }
     }
 
-    public void SetKnockbackDamage(Vector3 dir, KnockbackType type, bool damage = true)
+    public void SetKnockbackDamage(Vector3 dir, KnockbackType type, float hitTime, bool damage = true)
     {
         knockbackDir = dir;
         transform.forward = -dir;
@@ -114,8 +118,17 @@ public class PlayerKnockback : MonoBehaviour
         {
             playerManager.health--;
             GetComponent<Collider>().enabled = false;
+
+            if (playerManager.health <= 0)
+            {
+                OnDied?.Invoke();
+            }
+            else
+            {
+                OnDamaged?.Invoke();
+            }
         }
 
-        GetComponent<PlayerHitstop>().StartVictimHitstop(type == KnockbackType.Big);
+        GetComponent<PlayerHitstop>().StartVictimHitstop(hitTime);
     }
 }
