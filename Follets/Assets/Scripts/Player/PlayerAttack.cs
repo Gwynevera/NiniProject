@@ -138,10 +138,11 @@ public class PlayerAttack : MonoBehaviour
                     parried = false;
 
                     attackDirection = GetComponent<PlayerMovement>().GetMovementInput();
-                    if (attackDirection == Vector3.zero)
+                    if (attackDirection.magnitude < GetComponent<PlayerMovement>().minStickMovement)
                     {
                         attackDirection = transform.forward;
                     }
+
                     GetComponent<PlayerMovement>().DesiredForward = attackDirection;
 
                     if (charged)
@@ -261,6 +262,7 @@ public class PlayerAttack : MonoBehaviour
                 else
                 {
                     rb.linearVelocity *= attackFriction;
+                    if (rb.linearVelocity.magnitude < 0) rb.linearVelocity = Vector3.zero;
                 }
             }
         }
