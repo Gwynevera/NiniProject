@@ -36,6 +36,8 @@ public class PlayerMovement : MonoBehaviour
         rb.useGravity = false;
         rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        
+        desiredForward = transform.forward;
     }
 
     void Update()
@@ -75,7 +77,10 @@ public class PlayerMovement : MonoBehaviour
             || playerManager.MyState == PlayerState.Throwing
             || playerManager.MyState == PlayerState.Parrying)
         {
-            transform.forward = Vector3.Lerp(transform.forward, desiredForward, fastLerpSpeed * Time.fixedDeltaTime);
+            if (desiredForward != Vector3.zero)
+            {
+                transform.forward = Vector3.Lerp(transform.forward, desiredForward, fastLerpSpeed * Time.fixedDeltaTime);
+            }
         }
     }
 

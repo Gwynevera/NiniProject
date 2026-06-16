@@ -104,6 +104,7 @@ public class PlayerAttack : MonoBehaviour
         attackRecoverTime = attackRecoverTimeBase;
 
         attackMoveSpeed = attackMoveSpeedBase;
+        attackDirection = transform.forward;
 
         playerManager.OnResetAttack += ResetAttack;
         playerManager.OnGetWeapon += UpdateAttackStats;
@@ -141,6 +142,10 @@ public class PlayerAttack : MonoBehaviour
                     if (attackDirection.magnitude < GetComponent<PlayerMovement>().minStickMovement)
                     {
                         attackDirection = transform.forward;
+                    }
+                    else
+                    {
+                        attackDirection = attackDirection.normalized;
                     }
 
                     GetComponent<PlayerMovement>().DesiredForward = attackDirection;
@@ -435,5 +440,8 @@ public class PlayerAttack : MonoBehaviour
         holdTimer = 0;
 
         parried = false;
+        
+        attackDirection = transform.forward;
+        GetComponent<PlayerMovement>().DesiredForward = transform.forward;
     }
 }
